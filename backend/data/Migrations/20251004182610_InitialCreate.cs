@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace api.Migrations
+namespace data.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration
@@ -17,7 +17,11 @@ namespace api.Migrations
                     PlayerId = table.Column<string>(type: "text", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
-                    FantasyPositions = table.Column<string>(type: "text", nullable: false)
+                    FantasyPositions = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    DepthChartPos = table.Column<string>(type: "text", nullable: true),
+                    Team = table.Column<string>(type: "text", nullable: true),
+                    InjuryStatus = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
