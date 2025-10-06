@@ -7,6 +7,13 @@ using Data.Models;
 using System.Text.Json;
 using System.IO;
 
+
+/*
+----------------
+configuration
+----------------
+*/
+
 //secrets config
 IConfigurationRoot config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
@@ -24,18 +31,47 @@ var options = new DbContextOptionsBuilder<AppDbContext>()
     .UseNpgsql(config["ConnectionStrings:AppDbContext"])
     .Options;
 
+/*
+----------------
+control flow
+----------------
+*/
+if (args.Length > 0)
+{
+    //fetch all players and save locally
+    if (args.Contains("--fetch"))
+    {
+        var players = await FetchAndSavePlayersAsync(client);
+        string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
+        await using FileStream createStream = File.Create(fileName);
+        await JsonSerializer.SerializeAsync(createStream, players);
 
-//read and save data local
-var players = await ProcessPlayersAsync(client);
-string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
-await using FileStream createStream = File.Create(fileName);
-await JsonSerializer.SerializeAsync(createStream, players);
+        Console.WriteLine("saved player data");
+    }
 
+    //update db with players.json
+    else if (args.Contains("--upsert"))
+    {
+        Console.WriteLine("inside upsert");
+    }
 
-static async Task<List<Player>> ProcessPlayersAsync(HttpClient client)
+    else
+    {
+        Console.WriteLine("missing or invalid argument: --fetch or --load");
+    }
+  
+}
+
+/*
+----------------
+methods
+----------------
+*/
+static async Task<List<Player>> FetchAndSavePlayersAsync(HttpClient client)
 {
     var players = await client.GetFromJsonAsync<List<Player>>("https://api.sleeper.app/v1/league/1185731824680087552/rosters");
-
     
     return players ?? new();
 }
+
+static async Task LoadAndSaveToDbAsync() { }
