@@ -37,8 +37,8 @@ control flow
 ----------------
 */
 if (args.Length == 0)
-{   
-    Console.WriteLine("missing argument: --fetch or --upsert");
+{
+    throw new ArgumentException("missing argument: --fetch or --upsert");
 }
 else
 {
@@ -57,7 +57,7 @@ else
 
     else
     {
-        Console.WriteLine("invalid argument: --fetch or --upsert");
+        throw new ArgumentException("invalid argument: --fetch or --upsert");
     }
 
 }
@@ -67,20 +67,42 @@ else
 methods
 ----------------
 */
-static async Task<List<Player>> FetchPlayersAsync(HttpClient client)
+
+
+static async Task<Dictionary<string, Player>> FetchPlayersAsync(HttpClient client)
 {
-    var players = await client.GetFromJsonAsync<List<Player>>("https://api.sleeper.app/v1/league/1185731824680087552/rosters");
-    
-    return players ?? new();
+    try
+    {
+        string url = "https://api.sleeper.app/v1/players/nfl";
+        var players = await client.GetFromJsonAsync<Dictionary<string, Player>>(url);
+   
+        Console.WriteLine("fetched players");
+        return players ?? new();
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine($"error: {e}");
+        throw;
+    }
+   
 }
 
-static async Task WritePlayersJsonAsync(List<Player> players)
+static async Task WritePlayersJsonAsync(Dictionary<string, Player> players)
 {
-    string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
-    await using FileStream createStream = File.Create(fileName);
-    await JsonSerializer.SerializeAsync(createStream, players);
+    try
+    {
+        string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
+        await using FileStream createStream = File.Create(fileName);
+        await JsonSerializer.SerializeAsync(createStream, players);
 
-    Console.WriteLine("saved player data");
+        Console.WriteLine("saved players.json");
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine($"error: {e}");
+        throw;
+    }
 }
 
-static async Task LoadAndSaveToDbAsync() { }
+// static async Task LoadAndSaveToDbAsync() { }
+
