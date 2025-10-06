@@ -36,17 +36,17 @@ var options = new DbContextOptionsBuilder<AppDbContext>()
 control flow
 ----------------
 */
-if (args.Length > 0)
+if (args.Length == 0)
+{   
+    Console.WriteLine("missing argument: --fetch or --upsert");
+}
+else
 {
     //fetch all players and save locally
     if (args.Contains("--fetch"))
     {
-        var players = await FetchAndSavePlayersAsync(client);
-        string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
-        await using FileStream createStream = File.Create(fileName);
-        await JsonSerializer.SerializeAsync(createStream, players);
-
-        Console.WriteLine("saved player data");
+        var players = await FetchPlayersAsync(client);
+        await WritePlayersJsonAsync(players);
     }
 
     //update db with players.json
@@ -57,9 +57,9 @@ if (args.Length > 0)
 
     else
     {
-        Console.WriteLine("missing or invalid argument: --fetch or --load");
+        Console.WriteLine("invalid argument: --fetch or --upsert");
     }
-  
+
 }
 
 /*
@@ -67,11 +67,20 @@ if (args.Length > 0)
 methods
 ----------------
 */
-static async Task<List<Player>> FetchAndSavePlayersAsync(HttpClient client)
+static async Task<List<Player>> FetchPlayersAsync(HttpClient client)
 {
     var players = await client.GetFromJsonAsync<List<Player>>("https://api.sleeper.app/v1/league/1185731824680087552/rosters");
     
     return players ?? new();
+}
+
+static async Task WritePlayersJsonAsync(List<Player> players)
+{
+    string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
+    await using FileStream createStream = File.Create(fileName);
+    await JsonSerializer.SerializeAsync(createStream, players);
+
+    Console.WriteLine("saved player data");
 }
 
 static async Task LoadAndSaveToDbAsync() { }
