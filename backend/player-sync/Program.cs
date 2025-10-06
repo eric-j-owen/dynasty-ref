@@ -1,10 +1,11 @@
 ﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Data;
 using Data.Models; 
-
-
+using System.Text.Json;
+using System.IO;
 
 //secrets config
 IConfigurationRoot config = new ConfigurationBuilder()
@@ -24,12 +25,17 @@ var options = new DbContextOptionsBuilder<AppDbContext>()
     .Options;
 
 
-await ProcessRepositoriesAsync(client);
+//read and save data local
+var players = await ProcessPlayersAsync(client);
+string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
+await using FileStream createStream = File.Create(fileName);
+await JsonSerializer.SerializeAsync(createStream, players);
 
 
-static async Task ProcessRepositoriesAsync(HttpClient client)
+static async Task<List<Player>> ProcessPlayersAsync(HttpClient client)
 {
-    var json = await client.GetStringAsync("https://api.sleeper.app/v1/user/837121062331318272/leagues/nfl/2025");
+    var players = await client.GetFromJsonAsync<List<Player>>("https://api.sleeper.app/v1/league/1185731824680087552/rosters");
 
-    Console.Write(json);
+    
+    return players ?? new();
 }
