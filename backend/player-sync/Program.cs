@@ -75,12 +75,12 @@ methods
 ----------------
 */
 
-static async Task<Dictionary<string, Player>> FetchPlayersAsync(HttpClient client)
+static async Task<Dictionary<string, PlayerStaging>> FetchPlayersAsync(HttpClient client)
 {
     try
     {
         string url = "https://api.sleeper.app/v1/players/nfl";
-        var players = await client.GetFromJsonAsync<Dictionary<string, Player>>(url);
+        var players = await client.GetFromJsonAsync<Dictionary<string, PlayerStaging>>(url);
    
         Console.WriteLine("fetched players");
 
@@ -94,7 +94,7 @@ static async Task<Dictionary<string, Player>> FetchPlayersAsync(HttpClient clien
    
 }
 
-static async Task WritePlayersJsonAsync(Dictionary<string, Player> players)
+static async Task WritePlayersJsonAsync(Dictionary<string, PlayerStaging> players)
 {
     try
     {
@@ -137,6 +137,12 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
         await ctx.Database.ExecuteSqlRawAsync("truncate table \"PlayersStaging\";");
 
         //insert to staging
+        if (players == null)
+        {
+            Console.WriteLine("null players dict");
+            return;
+        }
+
         ctx.PlayersStaging.AddRange(players.Values);
         await ctx.SaveChangesAsync();
 
@@ -147,13 +153,13 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
             USING ""PlayersStaging"" AS source 
             ON target.""PlayerId"" = source.""PlayerId""
             WHEN MATCHED AND (
-                target.""FirstName"" IS DISTiNCT FROM source.""FirstName""
-                OR target.""LastName"" IS DISTiNCT FROM source.""LastName""
-                OR target.""Team"" IS DISTiNCT FROM source.""Team""
-                OR target.""Position"" IS DISTiNCT FROM source.""Position""
-                OR target.""FantasyPositions"" IS DISTiNCT FROM source.""FantasyPositions""
-                OR target.""Status"" IS DISTiNCT FROM source.""Status""
-                OR target.""InjuryStatus"" IS DISTiNCT FROM source.""InjuryStatus""
+                target.""FirstName"" IS DISTINCT FROM source.""FirstName""
+                OR target.""LastName"" IS DISTINCT FROM source.""LastName""
+                OR target.""Team"" IS DISTINCT FROM source.""Team""
+                OR target.""Position"" IS DISTINCT FROM source.""Position""
+                OR target.""FantasyPositions"" IS DISTINCT FROM source.""FantasyPositions""
+                OR target.""Status"" IS DISTINCT FROM source.""Status""
+                OR target.""InjuryStatus"" IS DISTINCT FROM source.""InjuryStatus""
             ) THEN
                 UPDATE SET
                     ""FirstName"" = source.""FirstName"",
