@@ -19,7 +19,6 @@ IConfigurationRoot config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
-
 //httpclient config
 using HttpClient client = new();
 client.DefaultRequestHeaders.Accept.Clear();
@@ -52,7 +51,7 @@ else
     //update db with players.json
     else if (args.Contains("--upsert"))
     {
-        Console.WriteLine("inside upsert");
+        await SaveToDbAsync(options);
     }
 
     else
@@ -68,7 +67,6 @@ methods
 ----------------
 */
 
-
 static async Task<Dictionary<string, Player>> FetchPlayersAsync(HttpClient client)
 {
     try
@@ -77,6 +75,7 @@ static async Task<Dictionary<string, Player>> FetchPlayersAsync(HttpClient clien
         var players = await client.GetFromJsonAsync<Dictionary<string, Player>>(url);
    
         Console.WriteLine("fetched players");
+
         return players ?? new();
     }
     catch (Exception e)
@@ -91,8 +90,8 @@ static async Task WritePlayersJsonAsync(Dictionary<string, Player> players)
 {
     try
     {
-        string fileName = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
-        await using FileStream createStream = File.Create(fileName);
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
+        await using FileStream createStream = File.Create(filePath);
         await JsonSerializer.SerializeAsync(createStream, players);
 
         Console.WriteLine("saved players.json");
@@ -104,5 +103,51 @@ static async Task WritePlayersJsonAsync(Dictionary<string, Player> players)
     }
 }
 
-// static async Task LoadAndSaveToDbAsync() { }
+static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
+{
+    try
+    {
+        //check file 
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
+        if (!File.Exists(filePath))
+        {
+            Console.WriteLine("file not found");
+            return;
+        }
+
+        //read file
+        string json = await File.ReadAllTextAsync(filePath);
+
+        //deserialize
+        var players = JsonSerializer.Deserialize<Dictionary<string, PlayerStaging>>(json);
+
+
+        //db context
+        using var ctx = new AppDbContext(options);
+
+        var test = players.Take(3).ToList();
+        foreach (var (key, player) in test)
+        {
+            ctx.PlayersStaging.Add(player);
+        }
+        await ctx.SaveChangesAsync();
+
+        //truncate staging table
+        
+        //insert to staging
+
+        //upsert with players table
+
+
+
+
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine($"error: {e}");
+        throw;
+    }
+    
+}
 
