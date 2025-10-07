@@ -125,22 +125,21 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
         //db context
         using var ctx = new AppDbContext(options);
 
-        var test = players.Take(3).ToList();
-        foreach (var (key, player) in test)
-        {
-            ctx.PlayersStaging.Add(player);
-        }
-        await ctx.SaveChangesAsync();
+        // var test = players.Take(3).ToList();
+        // foreach (var (key, player) in test)
+        // {
+        //     ctx.PlayersStaging.Add(player);
+        // }
+        // await ctx.SaveChangesAsync();
 
         //truncate staging table
-        
+        await ctx.Database.ExecuteSqlRawAsync("truncate table \"PlayersStaging\";");
+
         //insert to staging
+        ctx.PlayersStaging.AddRange(players.Values);
+        await ctx.SaveChangesAsync();
 
         //upsert with players table
-
-
-
-
 
     }
     catch (Exception e)
