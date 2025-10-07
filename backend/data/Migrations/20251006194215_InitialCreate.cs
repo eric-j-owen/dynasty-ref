@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -17,11 +18,12 @@ namespace data.Migrations
                     PlayerId = table.Column<string>(type: "text", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
-                    FantasyPositions = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    DepthChartPos = table.Column<string>(type: "text", nullable: true),
                     Team = table.Column<string>(type: "text", nullable: true),
-                    InjuryStatus = table.Column<string>(type: "text", nullable: true)
+                    Position = table.Column<string>(type: "text", nullable: true),
+                    FantasyPositions = table.Column<string[]>(type: "text[]", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: true),
+                    InjuryStatus = table.Column<string>(type: "text", nullable: true),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {

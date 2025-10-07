@@ -3,6 +3,7 @@ using System;
 using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251006194215_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,42 +26,6 @@ namespace data.Migrations
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Data.Models.Player", b =>
-                {
-                    b.Property<string>("PlayerId")
-                        .HasColumnType("text");
-
-                    b.PrimitiveCollection<string[]>("FantasyPositions")
-                        .HasColumnType("text[]");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("InjuryStatus")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Position")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Team")
-                        .HasColumnType("text");
-
-                    b.HasKey("PlayerId");
-
-                    b.ToTable("Players");
-                });
-
-            modelBuilder.Entity("Data.Models.PlayerStaging", b =>
                 {
                     b.Property<string>("PlayerId")
                         .HasColumnType("text")
@@ -100,7 +67,7 @@ namespace data.Migrations
 
                     b.HasKey("PlayerId");
 
-                    b.ToTable("PlayersStaging");
+                    b.ToTable("Players");
                 });
 #pragma warning restore 612, 618
         }
