@@ -37,7 +37,7 @@ control flow
 */
 if (args.Length == 0)
 {
-    throw new ArgumentException("missing argument: --fetch or --upsert");
+    throw new ArgumentException("missing argument");
 }
 else
 {
@@ -54,9 +54,17 @@ else
         await SaveToDbAsync(options);
     }
 
+    //run everything
+    else if (args.Contains("--all"))
+    {
+        var players = await FetchPlayersAsync(client);
+        await WritePlayersJsonAsync(players);
+        await SaveToDbAsync(options);
+    }
+
     else
     {
-        throw new ArgumentException("invalid argument: --fetch or --upsert");
+        throw new ArgumentException("invalid argument");
     }
 
 }
@@ -125,13 +133,6 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
         //db context
         using var ctx = new AppDbContext(options);
 
-        // var test = players.Take(3).ToList();
-        // foreach (var (key, player) in test)
-        // {
-        //     ctx.PlayersStaging.Add(player);
-        // }
-        // await ctx.SaveChangesAsync();
-
         //truncate staging table
         await ctx.Database.ExecuteSqlRawAsync("truncate table \"PlayersStaging\";");
 
@@ -140,6 +141,45 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
         await ctx.SaveChangesAsync();
 
         //upsert with players table
+        string q =
+        @"
+            MERGE INTO ""Players"" AS target
+            USING ""PlayersStaging"" AS source 
+            ON target.""PlayerId"" = source.""PlayerId""
+            WHEN MATCHED AND (
+                target.""FirstName"" IS DISTiNCT FROM source.""FirstName""
+                OR target.""LastName"" IS DISTiNCT FROM source.""LastName""
+                OR target.""Team"" IS DISTiNCT FROM source.""Team""
+                OR target.""Position"" IS DISTiNCT FROM source.""Position""
+                OR target.""FantasyPositions"" IS DISTiNCT FROM source.""FantasyPositions""
+                OR target.""Status"" IS DISTiNCT FROM source.""Status""
+                OR target.""InjuryStatus"" IS DISTiNCT FROM source.""InjuryStatus""
+            ) THEN
+                UPDATE SET
+                    ""FirstName"" = source.""FirstName"",
+                    ""LastName"" = source.""LastName"",
+                    ""Team"" = source.""Team"",
+                    ""Position"" = source.""Position"",
+                    ""FantasyPositions"" = source.""FantasyPositions"",
+                    ""Status"" = source.""Status"",
+                    ""InjuryStatus"" = source.""InjuryStatus"",
+                    ""LastUpdated"" = source.""LastUpdated""
+            WHEN NOT MATCHED THEN
+                INSERT 
+                (
+                    ""PlayerId"", ""FirstName"", ""LastName"", ""Team"", ""Position"", 
+                    ""FantasyPositions"", ""Status"", ""InjuryStatus"", ""LastUpdated"" 
+                )
+                VALUES  
+                (
+                    source.""PlayerId"", source.""FirstName"", source.""LastName"", source.""Team"", source.""Position"", 
+                    source.""FantasyPositions"", source.""Status"", source.""InjuryStatus"", source.""LastUpdated"" 
+                )  
+            
+        ;";
+
+        var rows = await ctx.Database.ExecuteSqlRawAsync(q);
+        Console.WriteLine($"{rows} row(s) affected");
 
     }
     catch (Exception e)
