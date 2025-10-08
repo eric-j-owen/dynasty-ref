@@ -13,6 +13,7 @@ namespace Data.Models
     public string[]? FantasyPositions { get; set; }
     public string? Status { get; set; }
     public string? InjuryStatus { get; set; }
+    public string? SearchFullName { get; set; }
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
   }
   
@@ -42,6 +43,9 @@ namespace Data.Models
 
     [JsonPropertyName("injury_status")]
     public string? InjuryStatus { get; set; }
+
+    [JsonPropertyName("search_full_name")]
+    public string? SearchFullName { get; set; }
 
     [JsonPropertyName("last_updated")]
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;

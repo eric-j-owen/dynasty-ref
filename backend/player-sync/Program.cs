@@ -128,6 +128,11 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
 
         //deserialize
         var players = JsonSerializer.Deserialize<Dictionary<string, PlayerStaging>>(json);
+        if (players == null)
+        {
+            Console.WriteLine("null players dict");
+            return;
+        }
 
 
         //db context
@@ -137,12 +142,6 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
         await ctx.Database.ExecuteSqlRawAsync("truncate table \"PlayersStaging\";");
 
         //insert to staging
-        if (players == null)
-        {
-            Console.WriteLine("null players dict");
-            return;
-        }
-
         ctx.PlayersStaging.AddRange(players.Values);
         await ctx.SaveChangesAsync();
 
@@ -160,6 +159,7 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
                 OR target.""FantasyPositions"" IS DISTINCT FROM source.""FantasyPositions""
                 OR target.""Status"" IS DISTINCT FROM source.""Status""
                 OR target.""InjuryStatus"" IS DISTINCT FROM source.""InjuryStatus""
+                OR target.""SearchFullName"" IS DISTINCT FROM source.""SearchFullName""
             ) THEN
                 UPDATE SET
                     ""FirstName"" = source.""FirstName"",
@@ -169,17 +169,18 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
                     ""FantasyPositions"" = source.""FantasyPositions"",
                     ""Status"" = source.""Status"",
                     ""InjuryStatus"" = source.""InjuryStatus"",
+                    ""SearchFullName"" = source.""SearchFullName"",
                     ""LastUpdated"" = source.""LastUpdated""
             WHEN NOT MATCHED THEN
                 INSERT 
                 (
                     ""PlayerId"", ""FirstName"", ""LastName"", ""Team"", ""Position"", 
-                    ""FantasyPositions"", ""Status"", ""InjuryStatus"", ""LastUpdated"" 
+                    ""FantasyPositions"", ""Status"", ""InjuryStatus"", ""SearchFullName"", ""LastUpdated"" 
                 )
                 VALUES  
                 (
                     source.""PlayerId"", source.""FirstName"", source.""LastName"", source.""Team"", source.""Position"", 
-                    source.""FantasyPositions"", source.""Status"", source.""InjuryStatus"", source.""LastUpdated"" 
+                    source.""FantasyPositions"", source.""Status"", source.""InjuryStatus"", source.""SearchFullName"", source.""LastUpdated"" 
                 )  
             
         ;";
