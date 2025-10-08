@@ -16,7 +16,7 @@ namespace Data.Models
     public string? SearchFullName { get; set; }
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
   }
-  
+
   public class PlayerStaging
   {
     [Key]
@@ -33,7 +33,7 @@ namespace Data.Models
     public string? Team { get; set; }
 
     [JsonPropertyName("position")]
-    public string? Position{ get; set; }
+    public string? Position { get; set; }
 
     [JsonPropertyName("fantasy_positions")]
     public string[]? FantasyPositions { get; set; }
