@@ -18,9 +18,35 @@ async Task Scraper()
     web.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
     //testing- load page 1 of ktc rankings
-    var htmlDoc = web.Load("https://keeptradecut.com/dynasty-rankings?page=0");
+    var html = web.Load("https://keeptradecut.com/dynasty-rankings?page=0");
 
-    var node = htmlDoc.DocumentNode.SelectSingleNode("//head/title");
 
-    Console.WriteLine(node.Name + "\n" + node.OuterHtml);
+
+    var playerData = new List<ScrapedPlayer>();
+
+    //player div
+    var htmlElements = html.DocumentNode.QuerySelectorAll("div.onePlayer");
+
+    //extract player data
+    foreach (var el in htmlElements)
+    {
+        var name = el.QuerySelector("div.player-name a").InnerText;
+        var valueTxt = el.QuerySelector("div.value").InnerText;
+        int value = int.Parse(valueTxt);
+
+        var player = new ScrapedPlayer()
+        {
+            SearchFullName = name,
+            Value = value
+        };
+
+        playerData.Add(player);
+
+    }
+    
+    //save local 
+    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data/test.json");
+    await using FileStream createStream = File.Create(filePath);
+    await JsonSerializer.SerializeAsync(createStream, playerData);
+
 }
