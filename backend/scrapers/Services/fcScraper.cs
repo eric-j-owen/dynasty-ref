@@ -1,0 +1,1 @@
+// https://api.fantasycalc.com/values/current?isDynasty=true&numQbs=2&numTeams=10&ppr=.5&includeAdp=false
