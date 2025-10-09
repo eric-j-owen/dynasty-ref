@@ -33,6 +33,8 @@ public abstract class Scraper
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
+    public abstract Task ScrapeAndSaveAsync();
+
     protected async Task SaveToFileAsync(string fileName, List<ScrapedPlayer> data)
     {
         try
@@ -49,8 +51,6 @@ public abstract class Scraper
             throw;
         }
     }
-
-    public abstract Task ScrapeAndSaveAsync();
 
     protected static string NormalizeName(string name)
     {
