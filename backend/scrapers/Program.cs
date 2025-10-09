@@ -11,6 +11,11 @@ if (args.Contains("--ktc"))
     var scraper = new KtcScraper();
     await scraper.ScrapeAndSaveAsync();
 }
+else if (args.Contains("--fc"))
+{
+    var scraper = new FcScraper();
+    await scraper.ScrapeAndSaveAsync();
+}
 
 else
 {
