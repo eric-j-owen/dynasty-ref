@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Models
 {
+  [Index(nameof(SearchFullName), Name = "Idx_SearchFullName")]
   public class Player
   {
     public required string PlayerId { get; set; }
