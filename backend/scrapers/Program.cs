@@ -13,39 +13,53 @@ using Data.Models;
 await Scraper();
 async Task Scraper()
 {
-    //initialize and set user agent
+    //initialize
     var web = new HtmlWeb();
     web.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-    //testing- load page 1 of ktc rankings
-    var html = web.Load("https://keeptradecut.com/dynasty-rankings?page=0");
-
-
-
+    int page = 0;
+    int limit = 9; //hard coded for now
     var playerData = new List<ScrapedPlayer>();
 
-    //player div
-    var htmlElements = html.DocumentNode.QuerySelectorAll("div.onePlayer");
 
-    //extract player data
-    foreach (var el in htmlElements)
+    while (page <= limit)
     {
-        var name = el.QuerySelector("div.player-name a").InnerText;
-        var valueTxt = el.QuerySelector("div.value").InnerText;
-        int value = int.Parse(valueTxt);
-
-        var player = new ScrapedPlayer()
+        try
         {
-            SearchFullName = name,
-            Value = value
-        };
+            //extract player elements for current page
+            var html = web.Load($"https://keeptradecut.com/dynasty-rankings?page={page}");
+            var htmlElements = html.DocumentNode.QuerySelectorAll("div.onePlayer");
 
-        playerData.Add(player);
+            Console.WriteLine($"page: {page} loaded. {htmlElements.Count} player elements.");
+
+            //parse current pages elements and add to player list
+            foreach (var el in htmlElements)
+            {
+                var name = el.QuerySelector("div.player-name a").InnerText;
+                var valueTxt = el.QuerySelector("div.value").InnerText;
+                int value = int.Parse(valueTxt);
+
+                var player = new ScrapedPlayer() //using default values for fields superflex and scoringformat
+                {
+                    SearchFullName = name,
+                    Value = value
+                };
+
+                playerData.Add(player);
+            }
+
+            await Task.Delay(2000);
+            page++;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"error page {page}: {e}");
+        }
 
     }
-    
+
     //save local 
-    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data/test.json");
+    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "data/ktc-rankings.json");
     await using FileStream createStream = File.Create(filePath);
     await JsonSerializer.SerializeAsync(createStream, playerData);
 
