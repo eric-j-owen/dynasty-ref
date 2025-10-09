@@ -16,7 +16,7 @@ namespace Data.Models
     public string? Status { get; set; }
     public string? InjuryStatus { get; set; }
     public string? SearchFullName { get; set; }
-    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+    public DateTime LastUpdated { get; set; }
   }
 
   public class PlayerStaging
