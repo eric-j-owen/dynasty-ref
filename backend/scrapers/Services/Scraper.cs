@@ -2,6 +2,7 @@ using HtmlAgilityPack;
 using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.RegularExpressions;
 
 namespace Scrapers.Services;
 
@@ -32,7 +33,7 @@ public abstract class Scraper
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
-    public async Task SaveToFileAsync(string fileName, List<ScrapedPlayer> data)
+    protected async Task SaveToFileAsync(string fileName, List<ScrapedPlayer> data)
     {
         try
         {
@@ -51,9 +52,10 @@ public abstract class Scraper
 
     public abstract Task ScrapeAndSaveAsync();
 
-    // need to impliment
-    protected string NormalizeName(string name)
+    protected static string NormalizeName(string name)
     {
+        Regex rgx = new Regex("[^a-zA-Z0-9]");
+        name = rgx.Replace(name, "").ToLower();
         return name;
     } 
 }
