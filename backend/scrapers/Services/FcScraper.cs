@@ -20,7 +20,13 @@ public class FcScraper : Scraper
         public string SleeperId { get; set; } = string.Empty;
     }
 
-    public async Task<List<ScrapedPlayer>> FetchPlayersAsync()
+    public override async Task ScrapeAndSaveAsync()
+    {
+        var playerData = await FetchPlayersAsync();
+        await SaveToFileAsync("fc-rankings", playerData);
+    }
+
+    private async Task<List<ScrapedPlayer>> FetchPlayersAsync()
     {
         try
         {
@@ -38,7 +44,7 @@ public class FcScraper : Scraper
             {
                 throw new Exception("missing fc data");
             }
-            
+
             //convert to type ScrapedPlayer
             var playerData = fcData.Select(p => new ScrapedPlayer
             {
@@ -55,11 +61,5 @@ public class FcScraper : Scraper
             Console.WriteLine($"error in fc fetch: {e}");
             throw;
         }
-    }
-
-    public override async Task ScrapeAndSaveAsync()
-    {
-        var playerData = await FetchPlayersAsync();
-        await SaveToFileAsync("fc-rankings", playerData);
     }
 }

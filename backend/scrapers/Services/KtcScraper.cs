@@ -2,7 +2,13 @@ namespace Scrapers.Services;
 
 public class KtcScraper : Scraper
 {
-    public async Task<List<ScrapedPlayer>> ScrapeAsync()
+    public override async Task ScrapeAndSaveAsync()
+    {
+        var playerData = await ScrapeAsync();
+        await SaveToFileAsync("ktc-rankings", playerData);
+    }
+
+    private async Task<List<ScrapedPlayer>> ScrapeAsync()
     {
         int page = 0;
         int limit = 1;//hard coded for now
@@ -42,15 +48,8 @@ public class KtcScraper : Scraper
             {
                 Console.WriteLine($"error page {page}: {e}");
             }
-
         }
 
         return playerData;
-    }
-
-    public override async Task ScrapeAndSaveAsync()
-    {
-        var playerData = await ScrapeAsync();
-        await SaveToFileAsync("ktc-rankings", playerData);
     }
 }
