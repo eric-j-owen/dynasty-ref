@@ -12,18 +12,7 @@ namespace Data.Models
         public required int ValueDelta { get; set; }
         public required DateTime ScrapedAt { get; set; }
     }
-
-    public class PlayerValueStaging
-    {
-        public required string PlayerId { get; set; }
-        public required string DataSource { get; set; }
-        public required bool IsSuperFlex { get; set; }
-        public required string PprFormat { get; set; }
-        public required int Value { get; set; }
-        public required int ValueDelta { get; set; }
-        public required DateTime ScrapedAt { get; set; }
-    }
-
+    
     public class ScrapedPlayer
     {
         public required string SearchFullName { get; set; }
