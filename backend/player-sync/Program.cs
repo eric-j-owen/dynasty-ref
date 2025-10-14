@@ -37,19 +37,19 @@ control flow
 */
 if (args.Length == 0)
 {
-    throw new ArgumentException("missing argument");
+    Console.WriteLine("missing argument: --push --pull --all");
 }
 else
 {
     //fetch all players and save locally
-    if (args.Contains("--fetch"))
+    if (args.Contains("--pull"))
     {
         var players = await FetchPlayersAsync(client);
         await WritePlayersJsonAsync(players);
     }
 
     //update db with players.json
-    else if (args.Contains("--upsert"))
+    else if (args.Contains("--push"))
     {
         await SaveToDbAsync(options);
     }
@@ -64,7 +64,7 @@ else
 
     else
     {
-        throw new ArgumentException("invalid argument");
+        Console.WriteLine("invalid argument: --push --pull --all");
     }
 
 }

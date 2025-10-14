@@ -3,7 +3,6 @@
 if (args.Length == 0)
 {
     Console.WriteLine("missing args");
-    return;
 }
 
 if (args.Contains("--ktc"))
@@ -20,5 +19,4 @@ else if (args.Contains("--fc"))
 else
 {
     Console.WriteLine("invalid arg");
-    return;
 }
