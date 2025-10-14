@@ -19,7 +19,8 @@ else if (args.Contains("--fc"))
 
 else if (args.Contains("--push"))
 {
-    Console.WriteLine("db ops");
+    var db = new DbService();
+    db.Main();
 }
 
 else
