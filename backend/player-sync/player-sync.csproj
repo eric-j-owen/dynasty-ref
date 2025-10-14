@@ -16,7 +16,7 @@
     <RootNamespace>player_sync</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UserSecretsId>61010ec4-2142-4162-8e10-cb39aa3cb995</UserSecretsId>
+    <UserSecretsId>35d1e618-052b-485d-9f35-2000fed880e8</UserSecretsId>
   </PropertyGroup>
 
 </Project>
