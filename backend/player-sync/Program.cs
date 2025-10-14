@@ -84,7 +84,12 @@ static async Task<Dictionary<string, PlayerStaging>> FetchPlayersAsync(HttpClien
    
         Console.WriteLine("fetched players");
 
-        return players ?? new();
+        if (players == null)
+        {
+            throw new Exception("failed fetch: sleeper api returned null players dict");
+        }
+
+        return players;
     }
     catch (Exception e)
     {
@@ -119,8 +124,7 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
         if (!File.Exists(filePath))
         {
-            Console.WriteLine("file not found");
-            return;
+            throw new Exception($"file not found at path {filePath}");
         }
 
         //read file
@@ -130,8 +134,7 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
         var players = JsonSerializer.Deserialize<Dictionary<string, PlayerStaging>>(json);
         if (players == null)
         {
-            Console.WriteLine("null players dict");
-            return;
+            throw new Exception("failed deserialize players.json");
         }
 
 
