@@ -12,5 +12,6 @@ namespace Data
 
         public DbSet<Player> Players { get; set; }
         public DbSet<PlayerStaging> PlayersStaging { get; set; }
+        public DbSet<PlayerValue> PlayerValues { get; set; }
     }
 }
