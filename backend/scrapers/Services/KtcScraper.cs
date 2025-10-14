@@ -8,10 +8,33 @@ public class KtcScraper : Scraper
         await SaveToFileAsync("ktc-rankings", playerData);
     }
 
+    // map ktc teams names to values used in sleeper api
+    private string MapTeam(string team)
+    {
+        var teamMappings = new Dictionary<string, string> // <ktc value, sleeper value>
+        {
+            {"SFO", "SF"},
+            {"NOS", "NO"},
+            {"JAC", "JAX"},
+            {"GBP", "GB"},
+            {"KCC", "KC" },
+            {"NEP", "NE"},
+            {"TBB", "TB" },
+            {"LVR", "LV" },
+        };
+
+        if (teamMappings.ContainsKey(team))
+        {
+            team = teamMappings[team];
+        }
+
+        return team;
+    }
+
     private async Task<List<ScrapedPlayer>> ScrapeAsync()
     {
         int page = 0;
-        int limit = 1;//hard coded for now
+        int limit = 0;//hard coded for now
         List<ScrapedPlayer> playerData = new();
 
         while (page <= limit)
@@ -30,14 +53,22 @@ public class KtcScraper : Scraper
                     var name = el.QuerySelector("div.player-name a").InnerText;
                     var valueTxt = el.QuerySelector("div.value").InnerText;
                     int value = int.Parse(valueTxt);
+                    var team = el.QuerySelector("span.player-team").InnerText;
+                    var position = el.QuerySelector("p.position").InnerText;
 
-                    var player = new ScrapedPlayer() //using default values for fields superflex and scoringformat
+                    if (position != "PICK") // only save player values
                     {
-                        SearchFullName = NormalizeName(name),
-                        Value = value
-                    };
+                        var player = new ScrapedPlayer() //using default values for fields superflex and scoringformat
+                        {
+                            SearchFullName = NormalizeString(name),
+                            Value = value,
+                            Team = MapTeam(team),
+                            Position = NormalizeString(position, false)
+                        };
+                        
+                        playerData.Add(player);
+                    }
 
-                    playerData.Add(player);
                 }
 
                 await Task.Delay(2000);

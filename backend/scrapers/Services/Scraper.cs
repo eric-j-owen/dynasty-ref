@@ -18,6 +18,8 @@ public abstract class Scraper
         public required int Value { get; set; }
         public bool IsSuperFlex { get; set; } = true; //default to true for now
         public string PprFormat { get; set; } = "0.5"; //defaulting to .5 for now, may include other formats later
+        public string? Team{ get; set; }
+        public string? Position { get; set; }
         public DateTime ScrapedAt { get; set; } = DateTime.UtcNow;
     }
 
@@ -43,7 +45,7 @@ public abstract class Scraper
             await using FileStream createStream = File.Create(filePath);
             await JsonSerializer.SerializeAsync(createStream, data);
 
-            Console.WriteLine($"saved ${data.Count} players to {fileName}.json");
+            Console.WriteLine($"saved {data.Count} players to {fileName}.json");
         }
         catch (Exception e)
         {
@@ -52,10 +54,14 @@ public abstract class Scraper
         }
     }
 
-    protected static string NormalizeName(string name)
+    protected static string NormalizeString(string str, bool toLower = true)
     {
-        Regex rgx = new Regex("[^a-zA-Z0-9]");
-        name = rgx.Replace(name, "").ToLower();
-        return name;
+        Regex rgx = new Regex("[^a-zA-Z]");
+        str = rgx.Replace(str, "");
+        if (toLower)
+        {
+            str = str.ToLower();
+        }
+        return str;
     } 
 }

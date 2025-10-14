@@ -48,7 +48,7 @@ public class FcScraper : Scraper
             //convert to type ScrapedPlayer
             var playerData = fcData.Select(p => new ScrapedPlayer
             {
-                SearchFullName = NormalizeName(p.Player.Name),
+                SearchFullName = NormalizeString(p.Player.Name),
                 SleeperId = p.Player.SleeperId,
                 Value = p.Value,
             }).ToList();
