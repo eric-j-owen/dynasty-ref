@@ -1,29 +1,36 @@
 ﻿using Scrapers.Services;
 
-if (args.Length == 0)
+try
 {
-    Console.WriteLine("missing args");
-    return;
-}
+    if (args.Length == 0)
+    {
+        throw new Exception("missing args");
+    }
+    else
+    {
+        if (args.Contains("--ktc"))
+        {
+            var scraper = new KtcScraper();
+            await scraper.ScrapeAndSaveAsync();
+        }
+        else if (args.Contains("--fc"))
+        {
+            var scraper = new FcScraper();
+            await scraper.ScrapeAndSaveAsync();
+        }
 
-if (args.Contains("--ktc"))
-{
-    var scraper = new KtcScraper();
-    await scraper.ScrapeAndSaveAsync();
-}
-else if (args.Contains("--fc"))
-{
-    var scraper = new FcScraper();
-    await scraper.ScrapeAndSaveAsync();
-}
+        else if (args.Contains("--push"))
+        {
+            DbService.ProcessData();
+        }
 
-else if (args.Contains("--push"))
-{
-    var db = new DbService();
-    db.Main();
+        else
+        {
+            throw new Exception("invalid arg");
+        }
+    }
 }
-
-else
+catch (Exception e)
 {
-    Console.WriteLine("invalid arg");
+    Console.WriteLine(e); 
 }
