@@ -21,7 +21,6 @@ IConfigurationRoot config = new ConfigurationBuilder()
 
 //httpclient config
 using HttpClient client = new();
-client.DefaultRequestHeaders.Accept.Clear();
 client.DefaultRequestHeaders.Accept.Add(
     new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -35,38 +34,45 @@ var options = new DbContextOptionsBuilder<AppDbContext>()
 control flow
 ----------------
 */
-if (args.Length == 0)
+try
 {
-    Console.WriteLine("missing argument: --push --pull --all");
-}
-else
-{
-    //fetch all players and save locally
-    if (args.Contains("--pull"))
+    if (args.Length == 0)
     {
-        var players = await FetchPlayersAsync(client);
-        await WritePlayersJsonAsync(players);
+        throw new Exception("missing argument: --push --pull --all");
     }
-
-    //update db with players.json
-    else if (args.Contains("--push"))
-    {
-        await SaveToDbAsync(options);
-    }
-
-    //run everything
-    else if (args.Contains("--all"))
-    {
-        var players = await FetchPlayersAsync(client);
-        await WritePlayersJsonAsync(players);
-        await SaveToDbAsync(options);
-    }
-
     else
     {
-        Console.WriteLine("invalid argument: --push --pull --all");
-    }
+        //fetch all players and save locally
+        if (args.Contains("--pull"))
+        {
+            var players = await FetchPlayersAsync(client);
+            WritePlayersJson(players);
+        }
 
+        //update db with players.json
+        else if (args.Contains("--push"))
+        {
+            SaveToDb(options);
+        }
+
+        //run everything
+        else if (args.Contains("--all"))
+        {
+            var players = await FetchPlayersAsync(client);
+            WritePlayersJson(players);
+            SaveToDb(options);
+        }
+
+        else
+        {
+            throw new Exception("invalid argument: --push --pull --all");
+        }
+
+    }
+}
+catch (Exception e)
+{
+    Console.WriteLine($"error: {e}");
 }
 
 /*
@@ -77,76 +83,62 @@ methods
 
 static async Task<Dictionary<string, PlayerStaging>> FetchPlayersAsync(HttpClient client)
 {
-    try
-    {
-        string url = "https://api.sleeper.app/v1/players/nfl";
-        var players = await client.GetFromJsonAsync<Dictionary<string, PlayerStaging>>(url);
    
-        Console.WriteLine("fetched players");
+    string url = "https://api.sleeper.app/v1/players/nfl";
+    var players = await client.GetFromJsonAsync<Dictionary<string, PlayerStaging>>(url);
 
-        if (players == null)
-        {
-            throw new Exception("failed fetch: sleeper api returned null players dict");
-        }
+    Console.WriteLine("fetched players");
 
-        return players;
-    }
-    catch (Exception e)
+    if (players == null)
     {
-        Console.WriteLine($"error: {e}");
-        throw;
+        throw new Exception("failed fetch: sleeper api returned null players dict");
     }
-   
+
+    return players;
 }
 
-static async Task WritePlayersJsonAsync(Dictionary<string, PlayerStaging> players)
+static void WritePlayersJson(Dictionary<string, PlayerStaging> players)
 {
-    try
-    {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
-        await using FileStream createStream = File.Create(filePath);
-        await JsonSerializer.SerializeAsync(createStream, players);
+    string fileName = "players.json";
+    string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+    string jsonStr = JsonSerializer.Serialize(players);
+    File.WriteAllText(filePath, jsonStr);
 
-        Console.WriteLine("saved players.json");
-    }
-    catch (Exception e)
-    {
-        Console.WriteLine($"error: {e}");
-        throw;
-    }
+    Console.WriteLine("saved players.json");
 }
 
-static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
+static void SaveToDb(DbContextOptions<AppDbContext> options)
 {
+    //check file 
+    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
+    if (!File.Exists(filePath))
+    {
+        throw new Exception($"file not found at path {filePath}");
+    }
+
+    //read file
+    string jsonStr = File.ReadAllText(filePath);
+
+    //deserialize
+    var players = JsonSerializer.Deserialize<Dictionary<string, PlayerStaging>>(jsonStr);
+    if (players == null)
+    {
+        throw new Exception("failed deserialize players.json");
+    }
+
+    //db operations
     try
     {
-        //check file 
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "players.json");
-        if (!File.Exists(filePath))
-        {
-            throw new Exception($"file not found at path {filePath}");
-        }
-
-        //read file
-        string json = await File.ReadAllTextAsync(filePath);
-
-        //deserialize
-        var players = JsonSerializer.Deserialize<Dictionary<string, PlayerStaging>>(json);
-        if (players == null)
-        {
-            throw new Exception("failed deserialize players.json");
-        }
-
-
-        //db context
+        //db context and transaction init
         using var ctx = new AppDbContext(options);
+        using var transaction = ctx.Database.BeginTransaction();
 
         //truncate staging table
-        await ctx.Database.ExecuteSqlRawAsync("truncate table \"PlayersStaging\";");
+        ctx.Database.ExecuteSqlRaw("truncate table \"PlayersStaging\";");
 
         //insert to staging
         ctx.PlayersStaging.AddRange(players.Values);
-        await ctx.SaveChangesAsync();
+        ctx.SaveChanges();
 
         //upsert with players table
         string q =
@@ -184,19 +176,16 @@ static async Task SaveToDbAsync(DbContextOptions<AppDbContext> options)
                 (
                     source.""PlayerId"", source.""FirstName"", source.""LastName"", source.""Team"", source.""Position"", 
                     source.""FantasyPositions"", source.""Status"", source.""InjuryStatus"", source.""SearchFullName"", source.""LastUpdated"" 
-                )  
-            
+                )
         ;";
 
-        var rows = await ctx.Database.ExecuteSqlRawAsync(q);
+        var rows = ctx.Database.ExecuteSqlRaw(q);
+        transaction.Commit();
         Console.WriteLine($"{rows} row(s) affected");
-
     }
     catch (Exception e)
     {
-        Console.WriteLine($"error: {e}");
-        throw;
+        throw new Exception($"Db transaction failed: {e}");
     }
-    
 }
 
