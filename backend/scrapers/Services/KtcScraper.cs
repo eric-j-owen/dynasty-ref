@@ -1,3 +1,5 @@
+using Scrapers.Models;
+
 namespace Scrapers.Services;
 
 public class KtcScraper : Scraper
@@ -5,11 +7,11 @@ public class KtcScraper : Scraper
     public override async Task ScrapeAndSaveAsync()
     {
         var playerData = await ScrapeAsync();
-        await SaveToFileAsync("ktc-rankings", playerData);
+        await SaveToFileAsync("ktc", playerData);
     }
 
     // map ktc teams names to values used in sleeper api
-    private string MapTeam(string team)
+    private static string MapTeam(string team)
     {
         var teamMappings = new Dictionary<string, string> // <ktc value, sleeper value>
         {
@@ -63,9 +65,10 @@ public class KtcScraper : Scraper
                             SearchFullName = NormalizeString(name),
                             Value = value,
                             Team = MapTeam(team),
-                            Position = NormalizeString(position, false)
+                            Position = NormalizeString(position, false),
+                            DataSource = "ktc"
                         };
-                        
+
                         playerData.Add(player);
                     }
 

@@ -3,30 +3,16 @@ using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
-
+using Scrapers.Models;
 namespace Scrapers.Services;
 
 public abstract class Scraper
 {
+    public abstract Task ScrapeAndSaveAsync();
     protected HtmlWeb web;
     protected HttpClient client;
     private const string USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-    public class ScrapedPlayer
-    {
-        public required int Value { get; set; }
-        public DateTime ScrapedAt { get; set; } = DateTime.UtcNow;
-
-        //fantasy options
-        public bool IsSuperFlex { get; set; } = true; //default to true for now
-        public string PprFormat { get; set; } = "0.5"; //defaulting to .5 for now, may include other formats later
-
-        //values to use for mapping to players table
-        public required string SearchFullName { get; set; }
-        public string? SleeperId { get; set; }
-        public string? Team{ get; set; }
-        public string? Position { get; set; }
-    }
-
+    
     public Scraper()
     {
         //html agility pack
@@ -39,23 +25,14 @@ public abstract class Scraper
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
-    public abstract Task ScrapeAndSaveAsync();
-
-    protected async Task SaveToFileAsync(string fileName, List<ScrapedPlayer> data)
+    protected static async Task SaveToFileAsync(string fileName, List<ScrapedPlayer> data)
     {
-        try
-        {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"data/{fileName}.json");
-            await using FileStream createStream = File.Create(filePath);
-            await JsonSerializer.SerializeAsync(createStream, data);
+       
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"data/{fileName}.json");
+        await using FileStream createStream = File.Create(filePath);
+        await JsonSerializer.SerializeAsync(createStream, data);
 
-            Console.WriteLine($"saved {data.Count} players to {fileName}.json");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"error: {e}");
-            throw;
-        }
+        Console.WriteLine($"saved {data.Count} players to {fileName}.json");
     }
 
     protected static string NormalizeString(string str, bool toLower = true)

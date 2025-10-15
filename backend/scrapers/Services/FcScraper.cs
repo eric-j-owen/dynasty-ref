@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-
+using Scrapers.Models;
 namespace Scrapers.Services;
 
 public class FcScraper : Scraper
@@ -23,7 +23,7 @@ public class FcScraper : Scraper
     public override async Task ScrapeAndSaveAsync()
     {
         var playerData = await FetchPlayersAsync();
-        await SaveToFileAsync("fc-rankings", playerData);
+        await SaveToFileAsync("fc", playerData);
     }
 
     private async Task<List<ScrapedPlayer>> FetchPlayersAsync()
@@ -51,6 +51,7 @@ public class FcScraper : Scraper
                 SearchFullName = NormalizeString(p.Player.Name),
                 SleeperId = p.Player.SleeperId,
                 Value = p.Value,
+                DataSource = "fc"
             }).ToList();
 
             Console.WriteLine($"fetched {playerData.Count} players");
