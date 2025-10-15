@@ -26,11 +26,7 @@ public static class DbService
         foreach (var file in files)
         {
             List<ScrapedPlayer> playerValues = DeserializeJson(file);
-
-            foreach (var record in playerValues.Take(5))
-            {
-                Console.WriteLine($"{record.DataSource}-{record.SearchFullName}");
-            }
+            SaveToDb(playerValues);
         }
     }
 
@@ -73,7 +69,41 @@ public static class DbService
         return playerValues;
     }
 
-    private static void SaveToDb()
+    private static void SaveToDb(List<ScrapedPlayer> scraped)
     {
+        //todo
+        //check for existing player values for the source/player
+        //if existing calculate delta and update value,delta,date
+        //if not existing insert new record
+
+        //relate player values to player table
+        //if sleeperid, use that
+        //else use team, position, and searchfullname to match
+
+        using var ctx = CreateContext();
+        var players = ctx.Players.ToList();
+
+        foreach (var record in scraped)
+        {
+            if (record.DataSource == "fc")
+            {
+                var matched = players.Where(p => p.PlayerId == record.SleeperId);
+                
+                foreach (var p in matched)
+                {
+                    Console.WriteLine(p.SearchFullName);
+                }
+                Console.WriteLine("==============");
+            
+                Console.WriteLine(record.SearchFullName);
+                Console.WriteLine(record.SleeperId);
+                Console.WriteLine("---------------");
+            }
+
+        }
+
+
+
+
     }
 }
