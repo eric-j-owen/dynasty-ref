@@ -3,13 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Data;
 using Data.Models;
+using Scrapers.Models;
 
 namespace Scrapers.Services;
 
-public class DbService
+public static class DbService
 {
-    private readonly string _connectionString;
-    public DbService()
+    private static readonly string _connectionString;
+    static DbService()
     {
         //user-secrets init
         IConfigurationRoot config = new ConfigurationBuilder()
@@ -19,7 +20,21 @@ public class DbService
             ?? throw new Exception("no connection string found");
     }
 
-    private AppDbContext CreateContext()
+    public static void ProcessData()
+    {
+        string[] files = GetJsonFiles();
+        foreach (var file in files)
+        {
+            List<ScrapedPlayer> playerValues = DeserializeJson(file);
+
+            foreach (var record in playerValues.Take(5))
+            {
+                Console.WriteLine($"{record.DataSource}-{record.SearchFullName}");
+            }
+        }
+    }
+
+    private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(_connectionString)
@@ -28,38 +43,37 @@ public class DbService
         return new AppDbContext(options);
     }
 
-    public async Task Main()
+    private static string[] GetJsonFiles()
     {
-        try
+        string dir = Path.Combine(Directory.GetCurrentDirectory(), "data");
+        if (!Directory.Exists(dir))
         {
-            // get files
-            string dir = Path.Combine(Directory.GetCurrentDirectory(), "data");
-            if (!Directory.Exists(dir))
-            {
-                throw new Exception($"{dir} not found");
-            }
-
-            string[] files = Directory.GetFiles(dir);
-
-            if (files.Length == 0)
-            {
-                throw new Exception($"{dir} directory returned 0 files");
-            }
-
-
-            //deserialize
-            foreach (var file in files)
-            {
-                Console.WriteLine(file);
-            }
-
-
-            //db operations
-
+            throw new Exception($"{dir} not found");
         }
-        catch (Exception e)
+
+        string[] files = Directory.GetFiles(dir);
+
+        if (files.Length == 0)
         {
-            Console.WriteLine($"error: {e}");
+            throw new Exception($"{dir} directory returned 0 files");
         }
+
+        return files;
+    }
+
+    private static List<ScrapedPlayer> DeserializeJson(string filePath)
+    {
+        var jsonStr = File.ReadAllText(filePath);
+        var playerValues = JsonSerializer.Deserialize<List<ScrapedPlayer>>(jsonStr);
+
+        if (playerValues.Count == 0)
+        {
+            throw new Exception($"file {filePath} returned 0 player values");
+        }
+        return playerValues;
+    }
+
+    private static void SaveToDb()
+    {
     }
 }
