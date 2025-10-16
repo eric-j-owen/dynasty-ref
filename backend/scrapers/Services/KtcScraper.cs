@@ -19,10 +19,10 @@ public class KtcScraper : Scraper
             {"NOS", "NO"},
             {"JAC", "JAX"},
             {"GBP", "GB"},
-            {"KCC", "KC" },
+            {"KCC", "KC"},
             {"NEP", "NE"},
-            {"TBB", "TB" },
-            {"LVR", "LV" },
+            {"TBB", "TB"},
+            {"LVR", "LV"},
         };
 
         if (teamMappings.ContainsKey(team))
@@ -57,10 +57,10 @@ public class KtcScraper : Scraper
                 //parse current pages elements and add to player list
                 foreach (var el in htmlElements)
                 {
-                    var name = el.QuerySelector("div.player-name a").InnerText;
+                    var name     = el.QuerySelector("div.player-name a").InnerText;
                     var valueTxt = el.QuerySelector("div.value").InnerText;
-                    int value = int.Parse(valueTxt);
-                    var team = el.QuerySelector("span.player-team").InnerText;
+                    int value    = int.Parse(valueTxt);
+                    var team     = el.QuerySelector("span.player-team").InnerText;
                     var position = el.QuerySelector("p.position").InnerText;
 
                     if (position != "PICK") // only save player values
@@ -68,10 +68,10 @@ public class KtcScraper : Scraper
                         var player = new ScrapedPlayer() //using default values for fields superflex and scoringformat
                         {
                             SearchFullName = NormalizeString(name),
-                            Value = value,
-                            Team = MapTeam(team),
-                            Position = NormalizeString(position, false),
-                            DataSource = "ktc"
+                            Value          = value,
+                            Team           = MapTeam(team),
+                            Position       = NormalizeString(position, false),
+                            DataSource     = "ktc"
                         };
 
                         playerData.Add(player);
