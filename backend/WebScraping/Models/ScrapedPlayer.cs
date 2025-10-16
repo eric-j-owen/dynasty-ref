@@ -1,4 +1,3 @@
-
 namespace WebScraping.Models;
 
 public class ScrapedPlayer

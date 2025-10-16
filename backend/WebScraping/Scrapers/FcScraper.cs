@@ -9,7 +9,7 @@ public class FcScraper : Scraper
     private class FcResponse
     {
         [JsonPropertyName("player")]
-        public Player Player { get; set; } = new Player();
+        public required Player Player { get; set; }
 
         [JsonPropertyName("value")]
         public int Value { get; set; }
@@ -17,7 +17,7 @@ public class FcScraper : Scraper
     private class Player
     {
         [JsonPropertyName("name")]
-        public string? Name { get; set; }
+        public required string Name { get; set; }
 
         [JsonPropertyName("sleeperId")]
         public string? SleeperId { get; set; }

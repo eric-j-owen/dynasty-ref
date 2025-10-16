@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using WebScraping.Models;
 
+
 namespace WebScraping.Scrapers;
 
 public abstract class Scraper
@@ -31,7 +32,7 @@ public abstract class Scraper
         return _web.Load(url);
     }
 
-    protected async Task<T> GetJsonAsync<T>(string url)
+    protected async Task<T?> GetJsonAsync<T>(string url)
     {
         return await _client.GetFromJsonAsync<T>(url);
     }

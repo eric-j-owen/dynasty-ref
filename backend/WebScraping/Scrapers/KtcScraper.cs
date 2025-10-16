@@ -1,5 +1,5 @@
 using WebScraping.Models;
-
+using Fizzler.Systems.HtmlAgilityPack;
 namespace WebScraping.Scrapers;
 
 public class KtcScraper : Scraper
@@ -28,7 +28,7 @@ public class KtcScraper : Scraper
 
         if (teamMappings.ContainsKey(team))
         {
-            team = teamMappings[team];
+            return teamMappings[team];
         }
 
         return team;
@@ -47,13 +47,13 @@ public class KtcScraper : Scraper
                 var html = LoadHtml($"https://keeptradecut.com/dynasty-rankings?page={page}");
                 var htmlElements = html.DocumentNode.QuerySelectorAll("div.onePlayer");
 
-                if (htmlElements.Count == 0)
+                if (htmlElements.Any())
                 {
                     Console.WriteLine("no more players found");
                     break;
                 }
 
-                Console.WriteLine($"page: {page} loaded. {htmlElements.Count} player elements.");
+                Console.WriteLine($"page: {page} loaded. {htmlElements.Count()} player elements.");
 
                 //parse current pages elements and add to player list
                 foreach (var el in htmlElements)
