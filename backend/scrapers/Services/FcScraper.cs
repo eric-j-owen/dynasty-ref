@@ -58,7 +58,7 @@ public class FcScraper : Scraper
                 .Where(p => p.Player.Position != "PICK")
                 .Select(p => new ScrapedPlayer
                 {
-                    SearchFullName = NormalizeString(p.Player.Name),
+                    SearchFullName = NormalizeString(p.Player.Name, true),
                     SleeperId      = p.Player.SleeperId,
                     Value          = p.Value,
                     DataSource     = "fc",

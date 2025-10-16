@@ -35,20 +35,25 @@ public abstract class Scraper
         Console.WriteLine($"saved {data.Count} players to {fileName}.json");
     }
 
-    protected static string NormalizeString(string? str, bool toLower = true)
+    protected static string NormalizeString(string str, bool toLower = false)
     {
         if (string.IsNullOrEmpty(str))
         {
             return "";
         }
 
+        //encoded html
         str = System.Net.WebUtility.HtmlDecode(str);
+
+        //alphanumeric
         Regex rgx = new Regex("[^a-zA-Z]");
         str = rgx.Replace(str, "");
+
         if (toLower)
         {
             str = str.ToLower();
         }
+
         return str;
     } 
 }

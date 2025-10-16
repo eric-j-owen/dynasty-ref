@@ -11,9 +11,9 @@ public class KtcScraper : Scraper
     }
 
     // map ktc teams names to values used in sleeper api
-    private static string MapTeam(string team)
+    private static string? MapTeam(string team)
     {
-        var teamMappings = new Dictionary<string, string> // <ktc value, sleeper value>
+        var teamMappings = new Dictionary<string, string?> // <ktc value, sleeper value>
         {
             {"SFO", "SF"},
             {"NOS", "NO"},
@@ -23,6 +23,7 @@ public class KtcScraper : Scraper
             {"NEP", "NE"},
             {"TBB", "TB"},
             {"LVR", "LV"},
+            {"FA", null } //sleeper treats free agents as null
         };
 
         if (teamMappings.ContainsKey(team))
@@ -67,10 +68,10 @@ public class KtcScraper : Scraper
                     {
                         var player = new ScrapedPlayer() //using default values for fields superflex and scoringformat
                         {
-                            SearchFullName = NormalizeString(name),
+                            SearchFullName = NormalizeString(name, true),
                             Value          = value,
                             Team           = MapTeam(team),
-                            Position       = NormalizeString(position, false),
+                            Position       = NormalizeString(position),
                             DataSource     = "ktc"
                         };
 
