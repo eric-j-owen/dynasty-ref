@@ -35,8 +35,14 @@ public abstract class Scraper
         Console.WriteLine($"saved {data.Count} players to {fileName}.json");
     }
 
-    protected static string NormalizeString(string str, bool toLower = true)
+    protected static string NormalizeString(string? str, bool toLower = true)
     {
+        if (string.IsNullOrEmpty(str))
+        {
+            return "";
+        }
+
+        str = System.Net.WebUtility.HtmlDecode(str);
         Regex rgx = new Regex("[^a-zA-Z]");
         str = rgx.Replace(str, "");
         if (toLower)

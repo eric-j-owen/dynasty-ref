@@ -16,16 +16,16 @@ public class FcScraper : Scraper
     private class Player
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonPropertyName("sleeperId")]
-        public string SleeperId { get; set; }
+        public string? SleeperId { get; set; }
 
         [JsonPropertyName("maybeTeam")]
-        public string Team { get; set; }
+        public string? Team { get; set; }
         
         [JsonPropertyName("position")]
-        public string Position { get; set; }
+        public string? Position { get; set; }
     }
 
     public override async Task ScrapeAndSaveAsync()
