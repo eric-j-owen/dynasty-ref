@@ -9,15 +9,23 @@ public class FcScraper : Scraper
     {
         [JsonPropertyName("player")]
         public Player Player { get; set; } = new Player();
+
         [JsonPropertyName("value")]
         public int Value { get; set; }
     }
     private class Player
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
+
         [JsonPropertyName("sleeperId")]
-        public string SleeperId { get; set; } = string.Empty;
+        public string SleeperId { get; set; }
+
+        [JsonPropertyName("maybeTeam")]
+        public string Team { get; set; }
+        
+        [JsonPropertyName("position")]
+        public string Position { get; set; }
     }
 
     public override async Task ScrapeAndSaveAsync()
@@ -46,13 +54,17 @@ public class FcScraper : Scraper
             }
 
             //convert to type ScrapedPlayer
-            var playerData = fcData.Select(p => new ScrapedPlayer
-            {
-                SearchFullName = NormalizeString(p.Player.Name),
-                SleeperId = p.Player.SleeperId,
-                Value = p.Value,
-                DataSource = "fc"
-            }).ToList();
+            var playerData = fcData
+                .Where(p => p.Player.Position != "PICK")
+                .Select(p => new ScrapedPlayer
+                {
+                    SearchFullName = NormalizeString(p.Player.Name),
+                    SleeperId      = p.Player.SleeperId,
+                    Value          = p.Value,
+                    DataSource     = "fc",
+                    Position       = p.Player.Position,
+                    Team           = p.Player.Team,
+                }).ToList();
 
             Console.WriteLine($"fetched {playerData.Count} players");
             return playerData;
