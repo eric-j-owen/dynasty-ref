@@ -36,16 +36,21 @@ public class KtcScraper : Scraper
     private async Task<List<ScrapedPlayer>> ScrapeAsync()
     {
         int page = 0;
-        int limit = 0;//hard coded for now
         List<ScrapedPlayer> playerData = new();
 
-        while (page <= limit)
+        while (true)
         {
             try
             {
                 //extract player elements for current page
                 var html = web.Load($"https://keeptradecut.com/dynasty-rankings?page={page}");
                 var htmlElements = html.DocumentNode.QuerySelectorAll("div.onePlayer");
+
+                if (htmlElements.Count == 0)
+                {
+                    Console.WriteLine("no more players found");
+                    break;
+                }
 
                 Console.WriteLine($"page: {page} loaded. {htmlElements.Count} player elements.");
 
