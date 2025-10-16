@@ -1,6 +1,6 @@
-using Scrapers.Models;
+using WebScraping.Models;
 
-namespace Scrapers.Services;
+namespace WebScraping.Scrapers;
 
 public class KtcScraper : Scraper
 {
@@ -44,7 +44,7 @@ public class KtcScraper : Scraper
             try
             {
                 //extract player elements for current page
-                var html = web.Load($"https://keeptradecut.com/dynasty-rankings?page={page}");
+                var html = LoadHtml($"https://keeptradecut.com/dynasty-rankings?page={page}");
                 var htmlElements = html.DocumentNode.QuerySelectorAll("div.onePlayer");
 
                 if (htmlElements.Count == 0)

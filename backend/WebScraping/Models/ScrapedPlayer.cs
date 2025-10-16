@@ -1,5 +1,5 @@
 
-namespace Scrapers.Models;
+namespace WebScraping.Models;
 
 public class ScrapedPlayer
 {

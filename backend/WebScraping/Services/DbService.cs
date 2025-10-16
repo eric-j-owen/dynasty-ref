@@ -3,9 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Data;
 using Data.Models;
-using Scrapers.Models;
+using WebScraping.Models;
+using WebScraping.Scrapers;
 
-namespace Scrapers.Services;
+namespace WebScraping.Services;
 
 public static class DbService
 {
@@ -90,8 +91,7 @@ public static class DbService
             //match with sleeperid if available
             if (!string.IsNullOrEmpty(record.SleeperId))
             {
-                matched = players
-                    .Where(p => p.PlayerId == record.SleeperId);
+                matched = players.Where(p => p.PlayerId == record.SleeperId);
             }
 
             //no sleeperid, try to match with name and position
@@ -132,17 +132,13 @@ public static class DbService
             {
                 Console.WriteLine($"no match found for {record.SearchFullName}");
                 Console.WriteLine(record.DataSource);
-                Console.WriteLine(record.SearchFullName);
-                Console.WriteLine(record.Team);
-                Console.WriteLine(record.Position);
-                Console.WriteLine("------------");
             }
 
         }
 
     }
 
-    private static bool MatchNames(string name1, string name2)
+    private static bool MatchNames(string? name1, string? name2)
     {
         if (string.IsNullOrEmpty(name1) || string.IsNullOrEmpty(name2))
         {

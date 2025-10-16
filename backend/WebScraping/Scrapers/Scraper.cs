@@ -3,31 +3,42 @@ using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
-using Scrapers.Models;
-namespace Scrapers.Services;
+using WebScraping.Models;
+
+namespace WebScraping.Scrapers;
 
 public abstract class Scraper
 {
     public abstract Task ScrapeAndSaveAsync();
-    protected HtmlWeb web;
-    protected HttpClient client;
+    private readonly HtmlWeb _web;
+    private readonly HttpClient _client;
     private const string USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
     
     public Scraper()
     {
         //html agility pack
-        web = new HtmlWeb();
-        web.UserAgent = USER_AGENT;
+        _web = new HtmlWeb();
+        _web.UserAgent = USER_AGENT;
 
         //http
-        client = new HttpClient();
-        client.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        _client = new HttpClient();
+        _client.DefaultRequestHeaders.Add("User-Agent", USER_AGENT);
+        _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    }
+
+    protected HtmlDocument LoadHtml(string url)
+    {
+        return _web.Load(url);
+    }
+
+    protected async Task<T> GetJsonAsync<T>(string url)
+    {
+        return await _client.GetFromJsonAsync<T>(url);
     }
 
     protected static async Task SaveToFileAsync(string fileName, List<ScrapedPlayer> data)
     {
-       
+
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"data/{fileName}.json");
         await using FileStream createStream = File.Create(filePath);
         await JsonSerializer.SerializeAsync(createStream, data);
@@ -42,7 +53,7 @@ public abstract class Scraper
             return "";
         }
 
-        //encoded html
+        //if encoded html
         str = System.Net.WebUtility.HtmlDecode(str);
 
         //alphanumeric

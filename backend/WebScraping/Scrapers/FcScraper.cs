@@ -1,7 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using Scrapers.Models;
-namespace Scrapers.Services;
+using WebScraping.Models;
+
+namespace WebScraping.Scrapers;
 
 public class FcScraper : Scraper
 {
@@ -47,7 +48,7 @@ public class FcScraper : Scraper
             string url = $"https://api.fantasycalc.com/values/current?isDynasty={isDynasty}&numQbs={numQbs}&numTeams={numTeams}&ppr={ppr}&includeAdp=false";
 
             //fetch from fc
-            var fcData = await client.GetFromJsonAsync<List<FcResponse>>(url);
+            var fcData = await GetJsonAsync<List<FcResponse>>(url);
             if (fcData == null)
             {
                 throw new Exception("missing fc data");

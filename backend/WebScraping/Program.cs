@@ -1,4 +1,5 @@
-﻿using Scrapers.Services;
+﻿using WebScraping.Services;
+using WebScraping.Scrapers;
 
 try
 {
