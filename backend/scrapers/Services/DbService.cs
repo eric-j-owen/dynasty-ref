@@ -62,7 +62,7 @@ public static class DbService
         var jsonStr = File.ReadAllText(filePath);
         var playerValues = JsonSerializer.Deserialize<List<ScrapedPlayer>>(jsonStr);
 
-        if (playerValues.Count == 0)
+        if (playerValues?.Count == 0 || playerValues == null)
         {
             throw new Exception($"file {filePath} returned 0 player values");
         }
@@ -71,39 +71,128 @@ public static class DbService
 
     private static void SaveToDb(List<ScrapedPlayer> scraped)
     {
-        //todo
-        //check for existing player values for the source/player
-        //if existing calculate delta and update value,delta,date
-        //if not existing insert new record
-
-        //relate player values to player table
-        //if sleeperid, use that
-        //else use team, position, and searchfullname to match
+        /*todo
+            []check for existing player values for the source/player
+            []if existing calculate delta and update value,delta,date
+            []if not existing insert new record
+            [x]relate player values to player table
+            [x]if sleeperid, use that
+            [x]else use team, position, and searchfullname to match
+            []refactor
+        */
 
         using var ctx = CreateContext();
         var players = ctx.Players.ToList();
+        IEnumerable<Player> matched = Enumerable.Empty<Player>();
 
         foreach (var record in scraped)
         {
-            if (record.DataSource == "fc")
+            //match with sleeperid if available
+            if (!string.IsNullOrEmpty(record.SleeperId))
             {
-                var matched = players.Where(p => p.PlayerId == record.SleeperId);
-                
-                foreach (var p in matched)
+                matched = players
+                    .Where(p => p.PlayerId == record.SleeperId);
+            }
+
+            //no sleeperid, try to match with name and position
+            else if (!string.IsNullOrEmpty(record.Position))
+            {
+                matched = players
+                    .Where(p =>
+                        MatchNames(p.SearchFullName, record.SearchFullName) &&
+                        p.Position == record.Position);
+
+
+                //if multiple matches try to match teams
+                if (matched.Count() > 1)
                 {
-                    Console.WriteLine(p.SearchFullName);
+                    var teamMatched = matched.Where(p => p.Team == record.Team);
+
+                    //match found by team
+                    if (teamMatched.Count() == 1)
+                    {
+                        matched = teamMatched;
+                        Console.WriteLine($"resolved dup for {record.SearchFullName}");
+                    }
+
+                    //unable to resolve duplicates
+                    else
+                    {
+                        Console.WriteLine($"unresolved duplicates for: {record.SearchFullName}");
+                    }
                 }
-                Console.WriteLine("==============");
-            
+            }
+
+            else
+            {
+                Console.WriteLine($"incomplete data for {record.SearchFullName}");
+            }
+
+            if (!matched.Any())
+            {
+                Console.WriteLine($"no match found for {record.SearchFullName}");
+                Console.WriteLine(record.DataSource);
                 Console.WriteLine(record.SearchFullName);
-                Console.WriteLine(record.SleeperId);
-                Console.WriteLine("---------------");
+                Console.WriteLine(record.Team);
+                Console.WriteLine(record.Position);
+                Console.WriteLine("------------");
             }
 
         }
 
+    }
 
+    private static bool MatchNames(string name1, string name2)
+    {
+        if (string.IsNullOrEmpty(name1) || string.IsNullOrEmpty(name2))
+        {
+            return false;
+        }
 
+        if (name1 == name2)
+        {
+            return true;
+        }
 
+        // account for nicknames being used in different data sources
+        var nameMappings = new Dictionary<string, string>
+        {
+            {"zonovanknight", "bamknight" },
+            {"marquisebrown", "hollywoodbrown" },
+            {"chigoziemokonkwo", "chigokonkwo" },
+            {"gabrieldavis", "gabedavis" },
+        };
+
+        string mappedName1 = nameMappings.ContainsKey(name1) ? nameMappings[name1] : name1;
+        string mappedName2 = nameMappings.ContainsKey(name2) ? nameMappings[name2] : name2;
+
+        if (mappedName1 == mappedName2)
+        {
+            return true;
+        }
+
+        //check without suffixes
+        if (RemoveSuffix(name1) == RemoveSuffix(name2))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    //normalize inconsistent suffixes being included/excluded between data sources
+    private static string RemoveSuffix(string name)
+    {
+        string[] suffixes = ["jr", "sr", "iii", "ii", "iv", "v"];
+        
+        foreach (var suffix in suffixes)
+        {
+            if (name.EndsWith(suffix))
+            {
+                return name.Substring(0, name.Length - suffix.Length);
+            }
+        }
+
+        return name;
     }
 }
