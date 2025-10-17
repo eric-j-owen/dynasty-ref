@@ -4,9 +4,11 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>35d1e618-052b-485d-9f35-2000fed880e8</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- <ProjectReference Include="../WebScraping/Webscraping.csproj" /> -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
