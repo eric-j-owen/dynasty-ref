@@ -40,7 +40,7 @@ public class FcScraper(HttpClient client) : IScraper
         var numTeams = 10;
         var ppr = .5;
 
-        string url = $"isDynasty={isDynasty}&numQbs={numQbs}&numTeams={numTeams}&ppr={ppr}&includeAdp=false";
+        string url = $"{Consts.FcBaseUrl}?isDynasty={isDynasty}&numQbs={numQbs}&numTeams={numTeams}&ppr={ppr}&includeAdp=false";
 
         //fetch from fc
         var fcData = await _client.GetFromJsonAsync<List<FcResponse>>(url) 

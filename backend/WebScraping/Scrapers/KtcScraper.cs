@@ -23,7 +23,7 @@ public class KtcScraper : IScraper
         while (true)
         {
             //extract player elements for current page
-            var html = _web.Load($"{Consts.KtcBaseUrl} page={page}");
+            var html = _web.Load($"{Consts.KtcBaseUrl}?page={page}");
             var htmlElements = html.DocumentNode.QuerySelectorAll("div.onePlayer");
 
             if (!htmlElements.Any())
