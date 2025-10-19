@@ -1,24 +1,37 @@
-using WebScraping.Utilities;
+using WebScraping.Helpers;
 
-namespace WebScraping.Tests;
-
-public class UnitTests
+namespace WebScraping.Tests
 {
-    [Theory]
-    [InlineData("Tom Brady", "tombrady")]
-    [InlineData("Ja'Marr Chase","jamarrchase")]
-    public void Name_IsNormalized(string input, string want)
+    public class HelpersUnitTests
     {
-        var got = NormalizeField.Name(input);
-        Assert.Equal(want, got);
+        [Theory]
+        [InlineData("Tom Brady", "tombrady")]
+        [InlineData("Ja'Marr Chase", "jamarrchase")]
+        [InlineData("A.J. Brown", "ajbrown")]
+        [InlineData("Derrick Kelly II", "derrickkellyii")]
+        [InlineData("", "")]
+        public void Name_IsNormalized(string input, string want)
+        {
+            var got = NormalizeField.Name(input);
+            Assert.Equal(want, got);
+        }
+
+        [Theory]
+        [InlineData("RB5", "RB")]
+        [InlineData("TE13", "TE")]
+        public void Position_IsNormalized(string input, string want)
+        {
+            var got = NormalizeField.Position(input);
+            Assert.Equal(want, got);
+        }
     }
 
-    [Theory]
-    [InlineData("RB5", "RB")]
-    [InlineData("TE13", "TE")]
-    public void Position_IsNormalized(string input, string want)
+    public class ScraperUnitTests
     {
-        var got = NormalizeField.Position(input);
-        Assert.Equal(want, got);
+        // [Theory]
+        // public void ScrapePlayer_ReturnsPlayerObject()
+        // {
+            
+        // }
     }
 }
