@@ -1,11 +1,14 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using WebScraping.Models;
+using Shared.Models;
+using WebScraping.Helpers;
 
 namespace WebScraping.Scrapers;
 
-public class FcScraper : Scraper
+public class FcScraper(HttpClient client) : IScraper
 {
+    private readonly HttpClient _client = client;
+
     private class FcResponse
     {
         [JsonPropertyName("player")]
@@ -29,51 +32,34 @@ public class FcScraper : Scraper
         public string? Position { get; set; }
     }
 
-    public override async Task ScrapeAndSaveAsync()
+    public async Task<List<ScrapedPlayer>> ScrapeAsync()
     {
-        var playerData = await FetchPlayersAsync();
-        await SaveToFileAsync("fc", playerData);
-    }
+        // params
+        var isDynasty = true;
+        var numQbs = 2;   //i.e. superflex
+        var numTeams = 10;
+        var ppr = .5;
 
-    private async Task<List<ScrapedPlayer>> FetchPlayersAsync()
-    {
-        try
-        {
-            // params
-            var isDynasty = true;
-            var numQbs = 2;   //i.e. superflex
-            var numTeams = 10;
-            var ppr = .5;
+        string url = $"isDynasty={isDynasty}&numQbs={numQbs}&numTeams={numTeams}&ppr={ppr}&includeAdp=false";
 
-            string url = $"https://api.fantasycalc.com/values/current?isDynasty={isDynasty}&numQbs={numQbs}&numTeams={numTeams}&ppr={ppr}&includeAdp=false";
+        //fetch from fc
+        var fcData = await _client.GetFromJsonAsync<List<FcResponse>>(url) 
+            ?? throw new Exception("fc api returned null");
 
-            //fetch from fc
-            var fcData = await GetJsonAsync<List<FcResponse>>(url);
-            if (fcData == null)
+        //convert to type ScrapedPlayer
+        var playerData = fcData
+            .Where(p => p.Player.Position != Consts.NonPlayerPosition)
+            .Select(p => new ScrapedPlayer
             {
-                throw new Exception("missing fc data");
-            }
+                SearchFullName = NormalizeField.Name(p.Player.Name),
+                SleeperId      = p.Player.SleeperId,
+                Value          = p.Value,
+                DataSource     = Consts.SourceFc,
+                Position       = p.Player.Position,
+                Team           = p.Player.Team,
+            }).ToList();
 
-            //convert to type ScrapedPlayer
-            var playerData = fcData
-                .Where(p => p.Player.Position != "PICK")
-                .Select(p => new ScrapedPlayer
-                {
-                    SearchFullName = NormalizeString(p.Player.Name, true),
-                    SleeperId      = p.Player.SleeperId,
-                    Value          = p.Value,
-                    DataSource     = "fc",
-                    Position       = p.Player.Position,
-                    Team           = p.Player.Team,
-                }).ToList();
-
-            Console.WriteLine($"fetched {playerData.Count} players");
-            return playerData;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"error in fc fetch: {e}");
-            throw;
-        }
+        Console.WriteLine($"fetched {playerData.Count} players");
+        return playerData;
     }
 }
