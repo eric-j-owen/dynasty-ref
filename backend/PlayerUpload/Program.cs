@@ -58,7 +58,9 @@ try
         //update db with players data
         else if (args.Contains("--push"))
         {
-            var data = fileService.ReadFromFileJson<Dictionary<string, PlayerStaging>>(FILE_NAME) ?? throw new Exception("player data is null");
+            var data = fileService.ReadFromFileJson<Dictionary<string, PlayerStaging>>(FILE_NAME)
+                ?? throw new Exception("player data is null");
+                
             dbService.ProcessPlayersFromFile(data);
         }
 
