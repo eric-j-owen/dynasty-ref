@@ -1,39 +1,20 @@
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 using Data.Models;
 
 namespace Data.Services;
-public class PlayerDbService
+public class PlayerDbService(AppDbContext context)
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _context = context;
 
-    public PlayerDbService(AppDbContext context)
+    public void ProcessPlayersFromFile(Dictionary<string, PlayerStaging> players)
     {
-        _context = context;
-    }
-
-    public void ProcessPlayersFromFile(string filePath)
-    {
-        //check file 
-        if (!File.Exists(filePath))
-        {
-            throw new Exception($"file not found at path {filePath}");
-        }
-
-        //read file
-        string jsonStr = File.ReadAllText(filePath);
-
-        //deserialize
-        var players = JsonSerializer.Deserialize<Dictionary<string, PlayerStaging>>(jsonStr);
         if (players == null)
         {
-            throw new Exception("failed deserialize players.json");
+            throw new Exception("passed data is null");
         }
 
-        //db operations
         try
         {
-            //db context and transaction init
             using var transaction = _context.Database.BeginTransaction();
 
             //truncate staging table

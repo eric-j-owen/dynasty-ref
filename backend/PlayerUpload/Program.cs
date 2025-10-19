@@ -4,19 +4,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
 using Data;
+using Data.Models;
 using Data.Services;
-using PlayerUpload.Services;
+using PlayerUpload;
+using Shared.Services;
 
-//config
-const string FILE_PATH = "../Data/json-data/players-master.json";
-
+//secrets config
 IConfigurationRoot config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddHttpClient<PlayerService>(
+//services
+builder.Services.AddHttpClient<PlayersApiService>(
     client =>
     {
         client.BaseAddress = new Uri("https://api.sleeper.app/v1/");
@@ -26,6 +27,7 @@ builder.Services.AddHttpClient<PlayerService>(
     }
 );
 builder.Services.AddTransient<PlayerDbService>();
+builder.Services.AddTransient<FileService>();
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(config.GetConnectionString("AppDbContext")));
 
@@ -36,39 +38,34 @@ try
 {
     if (args.Length == 0)
     {
-        throw new Exception("missing argument: --push --pull --all");
+        throw new Exception("missing argument: --push --pull");
     }
     else
     {
-        var playerService = host.Services.GetRequiredService<PlayerService>();
+        const string FILE_NAME= "players-master";
+
+        var playersApiService = host.Services.GetRequiredService<PlayersApiService>();
         var dbService = host.Services.GetRequiredService<PlayerDbService>();
+        var fileService = host.Services.GetRequiredService<FileService>();
 
         //fetch all players and save locally
         if (args.Contains("--pull"))
         {
-            var players = await playerService.FetchPlayersAsync();
-            playerService.WritePlayersJson(players, FILE_PATH);
+            var players = await playersApiService.FetchPlayersAsync();
+            fileService.WriteToFileJson(FILE_NAME, players);
         }
 
-        //update db with players.json
+        //update db with players data
         else if (args.Contains("--push"))
         {
-            dbService.ProcessPlayersFromFile(FILE_PATH);
-        }
-
-        //run everything
-        else if (args.Contains("--all"))
-        {
-            var players = await playerService.FetchPlayersAsync();
-            playerService.WritePlayersJson(players, FILE_PATH);
-            dbService.ProcessPlayersFromFile(FILE_PATH);
+            var data = fileService.ReadFromFileJson<Dictionary<string, PlayerStaging>>(FILE_NAME) ?? throw new Exception("player data is null");
+            dbService.ProcessPlayersFromFile(data);
         }
 
         else
         {
-            throw new Exception("invalid argument: --push --pull --all");
+            throw new Exception("invalid argument: --push --pull");
         }
-
     }
 }
 catch (Exception e)
