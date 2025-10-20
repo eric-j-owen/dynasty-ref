@@ -10,8 +10,10 @@ public class KtcScraper : IScraper
 
     public KtcScraper()
     {
-        _web = new HtmlWeb();
-        _web.UserAgent = Consts.UserAgent;
+        _web = new HtmlWeb
+        {
+            UserAgent = Consts.UserAgent
+        };
     }
 
 
