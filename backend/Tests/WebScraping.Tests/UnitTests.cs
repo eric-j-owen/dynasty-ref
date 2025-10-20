@@ -27,12 +27,6 @@ namespace WebScraping.Tests
 
     public class ScraperUnitTests
     {
-        private readonly KtcScraper _ktc;
-        public ScraperUnitTests()
-        {
-            _ktc = new KtcScraper();
-        }
-        
         [Fact]
         public void ParsePlayer_ReturnsPlayerObject()
         {
