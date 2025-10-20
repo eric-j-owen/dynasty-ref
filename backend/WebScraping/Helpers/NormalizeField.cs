@@ -1,6 +1,5 @@
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace WebScraping.Helpers;
 
