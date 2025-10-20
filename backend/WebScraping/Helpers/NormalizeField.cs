@@ -1,4 +1,6 @@
+using System.Net;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace WebScraping.Helpers;
 
@@ -6,7 +8,8 @@ public static class NormalizeField
 {
     public static string Name(string input)
     {
-        return MakeAlphabetic(input).ToLower();
+        var decoded = WebUtility.HtmlDecode(input);
+        return MakeAlphabetic(decoded).ToLower();
     }
 
     public static string Position(string input)

@@ -14,8 +14,7 @@ builder.Services.AddHttpClient<FcScraper>(
         client.BaseAddress = new Uri(Consts.FcBaseUrl);
         client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
-        client.DefaultRequestHeaders.UserAgent.Add(
-            new ProductInfoHeaderValue(Consts.UserAgent));
+        client.DefaultRequestHeaders.Add("User-Agent", Consts.UserAgent);
     }
 );
 

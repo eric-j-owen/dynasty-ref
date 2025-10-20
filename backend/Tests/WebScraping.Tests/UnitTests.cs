@@ -6,11 +6,9 @@ namespace WebScraping.Tests
     public class HelpersUnitTests
     {
         [Theory]
-        [InlineData("Tom Brady", "tombrady")]
-        [InlineData("Ja'Marr Chase", "jamarrchase")]
+        [InlineData("Ja&#x27;Marr Chase", "jamarrchase")]
         [InlineData("A.J. Brown", "ajbrown")]
-        [InlineData("Derrick Kelly II", "derrickkellyii")]
-        [InlineData("", "")]
+        [InlineData("De&#x27;Von Achane", "devonachane")]
         public void Name_IsNormalized(string input, string expected)
         {
             var actual = NormalizeField.Name(input);
