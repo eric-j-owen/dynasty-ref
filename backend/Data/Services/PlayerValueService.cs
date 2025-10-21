@@ -1,12 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Data;
 using Data.Models;
-using WebScraping.Models;
-using WebScraping.Scrapers;
+using Shared.Models;
 
-namespace WebScraping.Services;
+namespace Data.Services;
 
 public static class DbService
 {
@@ -180,7 +178,7 @@ public static class DbService
     private static string RemoveSuffix(string name)
     {
         string[] suffixes = ["jr", "sr", "iii", "ii", "iv", "v"];
-        
+
         foreach (var suffix in suffixes)
         {
             if (name.EndsWith(suffix))
@@ -192,3 +190,4 @@ public static class DbService
         return name;
     }
 }
+
