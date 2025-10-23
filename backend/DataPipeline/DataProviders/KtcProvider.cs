@@ -21,17 +21,18 @@ public class KtcProvider : IDataProvider<KtcScrapedPlayer>
     {
         get { return Consts.DataSources.Ktc; }
     }
+
+    /*
+        gets script tags
+        extracts contents of the script tag that contains playersArray
+        converts script tag to a string, 
+        splits it on the variable playersArray
+        splits again at json structure ending
+        deserializes and returns
+    */
     public List<KtcScrapedPlayer> ExtractData()
     {
-
-        /*
-            gets script tags
-            extracts contents of the script tag that contains playersArray
-            converts script tag to a string, 
-            splits it on the variable playersArray
-            splits again at json structure ending
-            deserializes and returns
-        */
+        const string playersArrayDeclarationStr = "var playersArray = ";
 
         var html = _web.Load($"{Consts.Paths.KtcBase}?page=0");
         var scriptNodes = html.DocumentNode.SelectNodes("//script");
@@ -40,18 +41,18 @@ public class KtcProvider : IDataProvider<KtcScrapedPlayer>
         foreach (var node in scriptNodes)
         {
             strNode = node.InnerText;
-            if (strNode.Contains("var playersArray"))
+            if (strNode.Contains(playersArrayDeclarationStr))
             {
                 break;
             }
         }
 
-        if (string.IsNullOrEmpty(strNode))
+        if (string.IsNullOrEmpty(strNode) || !strNode.Contains(playersArrayDeclarationStr))
         {
             throw new Exception("Ktc scraper could not find players array in script tag");
         }
 
-        var playersArraySplit = strNode.Split("var playersArray = ");
+        var playersArraySplit = strNode.Split(playersArrayDeclarationStr);
         var endOfJsonSplit = playersArraySplit[1].Split(";");
         var json = endOfJsonSplit[0];
 
