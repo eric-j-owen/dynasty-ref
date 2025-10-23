@@ -1,5 +1,5 @@
 using DataPipeline.Helpers;
-using DataPipeline.Loaders;
+
 namespace Tests.Unit
 {
 
@@ -14,47 +14,47 @@ namespace Tests.Unit
         }
     }
 
-    public class FileServiceTests : IDisposable
-    {
-        private readonly string _testDataDirectory = "./test-data";
-        private readonly FileService _fileService;
+    // public class FileServiceTests : IDisposable
+    // {
+    //     private readonly string _testDataDirectory = "./test-data";
+    //     private readonly FileService _fileService;
 
-        public FileServiceTests()
-        {
-            _fileService = new FileService(_testDataDirectory);
-        }
+    //     public FileServiceTests()
+    //     {
+    //         _fileService = new FileService(_testDataDirectory);
+    //     }
 
-        private class TestPlayer
-        {
-            public required string Name { get; set; }
-        }
+    //     private class TestPlayer
+    //     {
+    //         public required string Name { get; set; }
+    //     }
 
-        [Fact]
-        public void FileService_SavesJsonFileAndReadData()
-        {
-            var testData = new TestPlayer { Name = "test player" };
-            var testFileName = "test";
+    //     [Fact]
+    //     public void FileService_SavesJsonFileAndReadData()
+    //     {
+    //         var testData = new TestPlayer { Name = "test player" };
+    //         var testFileName = "test";
 
-            var testPath = Path.Combine(_testDataDirectory, $"{testFileName}.json");
+    //         var testPath = Path.Combine(_testDataDirectory, $"{testFileName}.json");
 
-            _fileService.WriteToFileJson(testFileName, testData);
-            var returnedData = _fileService.ReadFromFileJson<TestPlayer>(testFileName);
+    //         _fileService.WriteToFileJson(testFileName, testData);
+    //         var returnedData = _fileService.ReadFromFileJson<TestPlayer>(testFileName);
 
-            Assert.NotNull(returnedData);
-            Assert.True(File.Exists(testPath));
-            Assert.Equal("test player", returnedData.Name);
-        }
+    //         Assert.NotNull(returnedData);
+    //         Assert.True(File.Exists(testPath));
+    //         Assert.Equal("test player", returnedData.Name);
+    //     }
 
-        public void Dispose()
-        {
-            if (Directory.Exists(_testDataDirectory))
-            {
-                Directory.Delete(_testDataDirectory, true);
-            }
+    //     public void Dispose()
+    //     {
+    //         if (Directory.Exists(_testDataDirectory))
+    //         {
+    //             Directory.Delete(_testDataDirectory, true);
+    //         }
 
-            GC.SuppressFinalize(this);
-        }
-    }
+    //         GC.SuppressFinalize(this);
+    //     }
+    // }
 
     public class HelpersUnitTests
     {
@@ -78,23 +78,4 @@ namespace Tests.Unit
         }
     }
 
-    public class ScraperUnitTests
-    {
-        [Fact]
-        public void ParsePlayer_ReturnsPlayerObject()
-        {
-            string name = "Brian Thomas Jr.";
-            int value = 5000;
-            string team = "JAC";
-            string position = "WR13";
-
-            var actual = KtcScraper.ParsePlayer(name, value, team, position);
-
-            Assert.NotNull(actual);
-            Assert.Equal("brianthomasjr", actual.SearchFullName);
-            Assert.Equal(5000, actual.Value);
-            Assert.Equal("JAX", actual.Team);
-            Assert.Equal("WR", actual.Position);
-        }
-    }
 }

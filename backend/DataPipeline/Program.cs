@@ -40,7 +40,7 @@ try
     {
         case Consts.DataSources.Ktc:
             var KtcProvider = host.Services.GetRequiredService<KtcProvider>();
-            KtcProvider.ExtractData();
+            await KtcProvider.ExtractDataAsync($"{Consts.Paths.KtcBase}?page=0");
             break;
         default:
             Console.WriteLine("invalid argument");

@@ -1,6 +1,7 @@
 using HtmlAgilityPack;
 using DataPipeline.Helpers;
 using DataPipeline.DTOs;
+using DataPipeline.Interfaces;
 using System.Text.Json;
 
 namespace DataPipeline.DataProviders;
@@ -22,6 +23,11 @@ public class KtcProvider : IDataProvider<KtcScrapedPlayer>
         get { return Consts.DataSources.Ktc; }
     }
 
+    protected virtual HtmlDocument LoadHtml(string path)
+    {
+        return _web.Load(path);
+    }
+
     /*
         gets script tags
         extracts contents of the script tag that contains playersArray
@@ -30,11 +36,16 @@ public class KtcProvider : IDataProvider<KtcScrapedPlayer>
         splits again at json structure ending
         deserializes and returns
     */
-    public List<KtcScrapedPlayer> ExtractData()
+    public Task<List<KtcScrapedPlayer>> ExtractDataAsync(string? path)
     {
+        if (string.IsNullOrEmpty(path))
+        {
+            throw new Exception("ktcprovider: missing path arg");
+        }
+
         const string playersArrayDeclarationStr = "var playersArray = ";
 
-        var html = _web.Load($"{Consts.Paths.KtcBase}?page=0");
+        var html = LoadHtml(path);
         var scriptNodes = html.DocumentNode.SelectNodes("//script");
 
         string strNode = "";
@@ -63,7 +74,8 @@ public class KtcProvider : IDataProvider<KtcScrapedPlayer>
             throw new Exception("Ktc scraped data is null or empty");
         }
 
-        return ktcPlayers;
+
+        return Task.FromResult(ktcPlayers);
     }
 
 }
