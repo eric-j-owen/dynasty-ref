@@ -1,15 +1,31 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using Shared.Consts;
 namespace Db.Models;
 
+
+[Table("player_values")]
 public class PlayerValue
 {
+    [Column("id")]
     public int Id { get; set; }
-    public required string PlayerId { get; set; } //fk
-    public required Player Player { get; set; }
-    public required string DataSource { get; set; } //ktc, fc
+
+    [Column("data_source")]
+    public required DataSources DataSource { get; set; }
+
+    [Column("is_super_flex")]
     public required bool IsSuperFlex { get; set; }
-    public required bool TePremium { get; set; }
-    public required string PprFormat { get; set; }
+
+    [Column("value")]
     public required int Value { get; set; }
-    public required int ValueDelta { get; set; }
-    public required DateTime ScrapedAt { get; set; }
+
+    [Column("created_at")]
+    public required DateTime CreatedAt { get; set; }
+
+
+
+    [Column("player_id")]
+    public int PlayerId { get; set; }
+
+    [ForeignKey(nameof(PlayerId))]
+    public required Player Player { get; set; }
 }

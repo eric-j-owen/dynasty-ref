@@ -1,24 +1,29 @@
-using System.Text.Json.Serialization;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
+using Shared.Consts;
 
-namespace Db.Models
+namespace Db.Models;
+
+[Table("players")]
+public class Player
 {
-  public class Player
-  {
-    public required string PlayerId { get; set; }
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
-    public string? Team { get; set; }
-    public string? Position { get; set; }
-    public string[]? FantasyPositions { get; set; }
-    public string? Status { get; set; }
-    public string? InjuryStatus { get; set; }
-    public string? SearchFullName { get; set; }
-    public DateTime LastUpdated { get; set; }
-  }
+  [Column("id")]
+  public int Id { get; set; }
 
+  [Column("merged_full_name")]
+  public required string MergeFullName { get; set; }
 
+  [Column("first_name")]
+  public required string FirstName { get; set; }
+
+  [Column("last_name")]
+  public required string LastName { get; set; }
+
+  [Column("team")]
+  public Teams? Team { get; set; }
+
+  [Column("positions")]
+  public required Positions[] Positions { get; set; }
+
+  [Column("last_updated")]
+  public required DateTime LastUpdated { get; set; }
 }
-
-
