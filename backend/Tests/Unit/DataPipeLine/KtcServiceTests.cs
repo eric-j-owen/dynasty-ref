@@ -1,5 +1,4 @@
 using DataPipeline.DataProviders;
-using DataPipeline.DTOs;
 using HtmlAgilityPack;
 
 namespace Tests.Unit;

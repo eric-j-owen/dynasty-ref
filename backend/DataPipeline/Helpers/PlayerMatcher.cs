@@ -9,12 +9,35 @@ public static class PlayerMatcher
             return false;
         }
 
-        if (name1 == name2)
+        if (CheckAltNameEquality(name1, name2) && RemoveSuffixEquality(name1, name2))
         {
             return true;
         }
 
-        // account for nicknames being used in different data sources
+        return false;
+    }
+
+    public static bool RemoveSuffixEquality(string name1, string name2)
+    {
+        string[] suffixes = ["jr", "sr", "iii", "ii", "iv", "v"];
+
+        foreach (var suffix in suffixes)
+        {
+            if (name1.EndsWith(suffix))
+            {
+                name1 = name1[..^suffix.Length];
+            }
+
+            if (name2.EndsWith(suffix))
+            {
+                name2 = name2[..^suffix.Length];
+            }
+        }
+
+        return name1 == name2;
+    }
+    public static bool CheckAltNameEquality(string name1, string name2)
+    {
         var nameMappings = new Dictionary<string, string>
         {
             {"zonovanknight", "bamknight" },
@@ -26,33 +49,6 @@ public static class PlayerMatcher
         string mappedName1 = nameMappings.ContainsKey(name1) ? nameMappings[name1] : name1;
         string mappedName2 = nameMappings.ContainsKey(name2) ? nameMappings[name2] : name2;
 
-        if (mappedName1 == mappedName2)
-        {
-            return true;
-        }
-
-        //check without suffixes
-        if (RemoveSuffix(name1) == RemoveSuffix(name2))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    //normalize inconsistent suffixes being included/excluded between data sources
-    public static string RemoveSuffix(string name)
-    {
-        string[] suffixes = ["jr", "sr", "iii", "ii", "iv", "v"];
-
-        foreach (var suffix in suffixes)
-        {
-            if (name.EndsWith(suffix))
-            {
-                return name.Substring(0, name.Length - suffix.Length);
-            }
-        }
-
-        return name;
+        return mappedName1 == mappedName2;
     }
 }
