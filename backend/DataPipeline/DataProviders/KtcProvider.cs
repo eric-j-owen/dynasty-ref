@@ -1,51 +1,38 @@
 using HtmlAgilityPack;
-using DataPipeline.Helpers;
 using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
+using Shared.Consts;
 using System.Text.Json;
+using System.Net;
+
+
 
 namespace DataPipeline.DataProviders;
 
 public class KtcProvider : IDataProvider<KtcScrapedPlayer>
 {
     private readonly HtmlWeb _web;
+    private readonly string _endpoint;
 
     public KtcProvider()
     {
-        _web = new HtmlWeb
-        {
-            UserAgent = Consts.UserAgent
-        };
+        _web = new HtmlWeb { UserAgent = Api.UserAgent };
+        _endpoint = $"{Api.KtcBaseUrl}/dynasty-rankings?page=0";
     }
 
-    public string DataSource
+    public Task<List<KtcScrapedPlayer>> ExtractDataAsync()
     {
-        get { return Consts.DataSources.Ktc; }
+
+        var html = _web.Load(_endpoint);
+        var ktcPlayers = ParsePlayersFromDocument(html);
+
+        return Task.FromResult(ktcPlayers);
     }
 
-    protected virtual HtmlDocument LoadHtml(string path)
+    public static List<KtcScrapedPlayer> ParsePlayersFromDocument(HtmlDocument html)
     {
-        return _web.Load(path);
-    }
-
-    /*
-        gets script tags
-        extracts contents of the script tag that contains playersArray
-        converts script tag to a string, 
-        splits it on the variable playersArray
-        splits again at json structure ending
-        deserializes and returns
-    */
-    public Task<List<KtcScrapedPlayer>> ExtractDataAsync(string? path)
-    {
-        if (string.IsNullOrEmpty(path))
-        {
-            throw new Exception("ktcprovider: missing path arg");
-        }
-
         const string playersArrayDeclarationStr = "var playersArray = ";
 
-        var html = LoadHtml(path);
         var scriptNodes = html.DocumentNode.SelectNodes("//script");
 
         string strNode = "";
@@ -74,8 +61,6 @@ public class KtcProvider : IDataProvider<KtcScrapedPlayer>
             throw new Exception("Ktc scraped data is null or empty");
         }
 
-
-        return Task.FromResult(ktcPlayers);
+        return ktcPlayers;
     }
-
 }
