@@ -10,7 +10,7 @@ public class Player
   public int Id { get; set; }
 
   [Column("merged_full_name")]
-  public required string MergeFullName { get; set; }
+  public required string MergedFullName { get; set; }
 
   [Column("first_name")]
   public required string FirstName { get; set; }
