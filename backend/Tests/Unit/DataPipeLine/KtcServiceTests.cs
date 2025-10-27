@@ -16,7 +16,7 @@ public class KtcTests
         var html = new HtmlDocument();
         html.Load(testFilePath);
 
-        var actual = KtcProvider.ParsePlayersFromDocument(html);
+        var actual = KtcScraper.ParsePlayersFromDocument(html);
 
         var expected = new[]
         {

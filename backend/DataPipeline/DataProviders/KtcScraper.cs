@@ -9,24 +9,20 @@ using System.Net;
 
 namespace DataPipeline.DataProviders;
 
-public class KtcProvider : IDataProvider<KtcScrapedPlayer>
+public class KtcScraper(HttpClient client) : IDataProvider<KtcScrapedPlayer>
 {
-    private readonly HtmlWeb _web;
-    private readonly string _endpoint;
+    private readonly HttpClient _client = client;
+    private readonly string _endpoint = "/dynasty-rankings?page=0";
 
-    public KtcProvider()
-    {
-        _web = new HtmlWeb { UserAgent = Api.UserAgent };
-        _endpoint = $"{Api.KtcBaseUrl}/dynasty-rankings?page=0";
-    }
-
-    public Task<List<KtcScrapedPlayer>> ExtractDataAsync()
+    public async Task<List<KtcScrapedPlayer>> ExtractDataAsync()
     {
 
-        var html = _web.Load(_endpoint);
-        var ktcPlayers = ParsePlayersFromDocument(html);
+        var res = await _client.GetStringAsync(_endpoint);
 
-        return Task.FromResult(ktcPlayers);
+        var html = new HtmlDocument();
+        html.LoadHtml(res);
+
+        return ParsePlayersFromDocument(html);
     }
 
     public static List<KtcScrapedPlayer> ParsePlayersFromDocument(HtmlDocument html)

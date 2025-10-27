@@ -1,11 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace DataPipeline.DTOs;
 
 public class KtcScrapedPlayer
 {
-    [Key]
     [JsonPropertyName("playerID")]
     public int KtcId { get; set; }
 
