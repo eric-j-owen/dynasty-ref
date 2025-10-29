@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace DataPipeline.DataProviders;
 
-public class KtcScraper(HttpClient client) : IDataProvider<KtcScrapedPlayer>
+public class KtcValuesScraper(HttpClient client) : IDataProvider<KtcScrapedPlayer>
 {
     private readonly HttpClient _client = client;
     private readonly string _endpoint = "/dynasty-rankings?page=0";

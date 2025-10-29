@@ -5,9 +5,9 @@ namespace DataPipeline.Services;
 
 public class KtcService : IDataPipelineService
 {
-    private readonly KtcScraper _scraper;
+    private readonly KtcRankingsScraper _scraper;
 
-    public KtcService(KtcScraper scraper)
+    public KtcService(KtcRankingsScraper scraper)
     {
         _scraper = scraper;
     }

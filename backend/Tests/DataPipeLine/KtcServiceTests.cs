@@ -14,7 +14,7 @@ public class KtcTests
         var html = new HtmlDocument();
         html.Load(testFilePath);
 
-        var actual = KtcScraper.ParsePlayersFromDocument(html);
+        var actual = KtcValuesScraper.ParsePlayersFromDocument(html);
 
         var expected = new[]
         {
@@ -40,7 +40,7 @@ public class KtcTests
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        var e = Assert.Throws<Exception>(() => KtcScraper.ParsePlayersFromDocument(doc));
+        var e = Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
 
         Assert.Equal("Ktc scraper: did not find <script> tags", e.Message);
 
@@ -53,7 +53,7 @@ public class KtcTests
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        var e = Assert.Throws<Exception>(() => KtcScraper.ParsePlayersFromDocument(doc));
+        var e = Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
 
         Assert.Equal("Ktc scraper could not find data in script tag", e.Message);
 
