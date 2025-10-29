@@ -1,16 +1,14 @@
 using DataPipeline.DataProviders;
 using HtmlAgilityPack;
 
-namespace Tests.Unit;
+namespace Tests.DataPipeline;
 
 public class KtcTests
 {
     [Fact]
     public void ParsePlayersFromDocument_ReturnsParsedPlayerList()
     {
-        var projectRoot = Directory.GetParent(AppContext.BaseDirectory)!
-           .Parent!.Parent!.Parent!.FullName;
-
+        var projectRoot = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
         var testFilePath = Path.Combine(projectRoot, "TestData", "KtcPage.html");
 
         var html = new HtmlDocument();
@@ -34,4 +32,32 @@ public class KtcTests
         Assert.Equal(expected[2].name, actual[2].PlayerName);
         Assert.Equal(expected[3].name, actual[3].PlayerName);
     }
+
+    [Fact]
+    public void ParsePlayersFromDocument_ThrowsError_NullScriptTags()
+    {
+        var html = "<html><head></head></html>";
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        var e = Assert.Throws<Exception>(() => KtcScraper.ParsePlayersFromDocument(doc));
+
+        Assert.Equal("Ktc scraper: did not find <script> tags", e.Message);
+
+    }
+
+    [Fact]
+    public void ParsePlayersFromDocument_ThrowsError_WhenEmptyData()
+    {
+        var html = "<html><head><script></script></head></html>";
+        var doc = new HtmlDocument();
+        doc.LoadHtml(html);
+
+        var e = Assert.Throws<Exception>(() => KtcScraper.ParsePlayersFromDocument(doc));
+
+        Assert.Equal("Ktc scraper could not find data in script tag", e.Message);
+
+    }
+
+
 }

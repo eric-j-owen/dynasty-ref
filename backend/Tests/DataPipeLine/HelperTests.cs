@@ -1,6 +1,6 @@
 using DataPipeline.Helpers;
 
-namespace Tests.Unit.DataPipeline
+namespace Tests.DataPipeline
 {
 
     public class PlayerMatchingTests

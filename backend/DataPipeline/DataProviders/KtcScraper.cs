@@ -1,10 +1,7 @@
 using HtmlAgilityPack;
 using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
-using Shared.Consts;
 using System.Text.Json;
-using System.Net;
-
 
 
 namespace DataPipeline.DataProviders;
@@ -30,7 +27,10 @@ public class KtcScraper(HttpClient client) : IDataProvider<KtcScrapedPlayer>
         const string playersArrayDeclarationStr = "var playersArray = ";
 
         var scriptNodes = html.DocumentNode.SelectNodes("//script");
-
+        if (scriptNodes == null)
+        {
+            throw new Exception("Ktc scraper: did not find <script> tags");
+        }
         string strNode = "";
         foreach (var node in scriptNodes)
         {
@@ -41,9 +41,9 @@ public class KtcScraper(HttpClient client) : IDataProvider<KtcScrapedPlayer>
             }
         }
 
-        if (string.IsNullOrEmpty(strNode) || !strNode.Contains(playersArrayDeclarationStr))
+        if (!strNode.Contains(playersArrayDeclarationStr))
         {
-            throw new Exception("Ktc scraper could not find players array in script tag");
+            throw new Exception("Ktc scraper could not find data in script tag");
         }
 
         var playersArraySplit = strNode.Split(playersArrayDeclarationStr);
