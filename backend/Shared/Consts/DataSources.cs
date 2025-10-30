@@ -1,6 +1,6 @@
 namespace Shared.Consts;
 
-public enum DataSources
+public enum DataSource
 {
     KeepTradeCut,
     FantasyCalc,
