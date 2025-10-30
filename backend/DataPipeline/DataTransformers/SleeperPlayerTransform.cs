@@ -42,6 +42,7 @@ public class SleeperPlayerTransformer : IDataTransformer<SleeperPlayer>
             }
 
             var parsedPositions = player.Positions!
+                .Where(_positions.Contains)
                 .Select(Enum.Parse<PlayerConsts.IncludedPosition>)
                 .ToArray();
 
