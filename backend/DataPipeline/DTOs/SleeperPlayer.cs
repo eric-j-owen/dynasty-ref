@@ -5,19 +5,19 @@ namespace DataPipeline.DTOs;
 public class SleeperPlayer
 {
     [JsonPropertyName("player_id")]
-    public required int SleeperId { get; set; }
+    public string? SleeperId { get; set; }
 
     [JsonPropertyName("first_name")]
-    public required string FirstName { get; set; }
+    public string? FirstName { get; set; }
 
     [JsonPropertyName("last_name")]
-    public required string LastName { get; set; }
+    public string? LastName { get; set; }
 
     [JsonPropertyName("search_full_name")]
-    public required string MergeName { get; set; }
+    public string? SearchFullName { get; set; }
 
     [JsonPropertyName("fantasy_positions")]
-    public string[]? Position { get; set; }
+    public string[]? Positions { get; set; }
 
     [JsonPropertyName("team")]
     public string? Team { get; set; }
