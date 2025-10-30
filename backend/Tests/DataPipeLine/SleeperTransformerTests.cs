@@ -43,17 +43,86 @@ public class SleeperTransformerTests
     [Fact]
     public void Transform_ParsesAndFilters_Positions()
     {
-        Assert.Fail();
+        var transformer = new SleeperPlayerTransformer();
+        var data = new List<SleeperPlayer>
+        {
+            new()
+            {
+                SleeperId = "1",
+                FirstName = "Josh",
+                LastName = "Allen",
+                Positions=["QB", "WR", "TE"],
+                SearchFullName = "joshallen"
+            },
+            new()
+            {
+                SleeperId = "1",
+                FirstName = "Josh",
+                LastName = "Allen",
+                Positions=["QB", "DL"],
+                SearchFullName = "joshallen"
+            },
+            new()
+            {
+                SleeperId = "1",
+                FirstName = "Josh",
+                LastName = "Allen",
+                Positions=["RB", "LB", "K", ""],
+                SearchFullName = "joshallen"
+            },
+        };
+
+        var result = transformer.Transform(data);
+
+        Assert.NotNull(result.PlayerData);
+
+        foreach (var player in result.PlayerData)
+        {
+            Assert.All(player.Positions, p =>
+            {
+                Assert.IsType<PlayerConsts.IncludedPosition>(p);
+            });
+        }
+
     }
     [Fact]
     public void Transform_Filters_IncompleteData()
     {
-        Assert.Fail();
+
+        var transformer = new SleeperPlayerTransformer();
+        var data = new List<SleeperPlayer>
+        {
+            new() {SleeperId="1", Positions=["QB"], FirstName="", LastName="b", SearchFullName=" b" },
+            new() {SleeperId="1", Positions=["QB"], FirstName="a", LastName="", SearchFullName="a " },
+            new() {SleeperId="1", Positions=["QB"], FirstName="a", LastName="b", SearchFullName=""}
+        };
+
+        var result = transformer.Transform(data);
+        Assert.NotNull(result.PlayerData);
+        Assert.NotNull(result.IncompletePlayerData);
+
+        var actual = result.IncompletePlayerData;
+        Assert.Equal(3, actual.Count);
+        foreach (var player in actual)
+        {
+            Assert.Equal(ApiConsts.IncompleteDataReason.MissingName, player.Reason);
+        }
     }
 
     [Fact]
-    public void Transform_Filters_NullData()
+    public void Transform_Filters_NonPlayerRecords()
     {
-        Assert.Fail();
+        var transformer = new SleeperPlayerTransformer();
+        var data = new List<SleeperPlayer>
+        {
+            new() {Positions = null},
+            new() {SleeperId = null},
+            new() {Positions = [""]},
+            new() {SleeperId = ""}
+        };
+
+        var result = transformer.Transform(data);
+        Assert.NotNull(result.PlayerData);
+        Assert.Empty(result.PlayerData);
     }
 }
