@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace DataPipeline.Services;
+namespace DataPipeline.Helpers;
 
 public class FileService(string basePath = "../Data/json-data")
 {
