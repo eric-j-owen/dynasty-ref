@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Shared.Consts;
 
 namespace Db.Models;
 
 [Table("incomplete_data_players")]
-public class IncompleteDataPlayers
+public class IncompletePlayerData
 {
     [Column("id")]
     public int Id { get; set; }
@@ -12,7 +13,7 @@ public class IncompleteDataPlayers
     public required string RawData { get; set; }
 
     [Column("reason")]
-    public string? Reason { get; set; }
+    public required ApiConsts.IncompleteDataReason Reason { get; set; }
 
     [Column("is_resolved")]
     public bool IsResolved { get; set; } = false;
