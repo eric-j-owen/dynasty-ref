@@ -9,8 +9,8 @@ public class Player
   [Column("id")]
   public int Id { get; set; }
 
-  [Column("merged_full_name")]
-  public required string MergedFullName { get; set; }
+  [Column("normalized_name")]
+  public required string NormalizedName { get; set; }
 
   [Column("first_name")]
   public required string FirstName { get; set; }
@@ -19,11 +19,16 @@ public class Player
   public required string LastName { get; set; }
 
   [Column("team")]
-  public Teams? Team { get; set; }
+  public PlayerConsts.Team? Team { get; set; }
 
   [Column("positions")]
-  public required Positions[] Positions { get; set; }
+  public required PlayerConsts.IncludedPosition[] Positions { get; set; }
 
   [Column("last_updated")]
-  public required DateTime LastUpdated { get; set; }
+  public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+
+
+  private readonly List<ExternalIdPlayerLookup> _externalIds = [];
+  public IEnumerable<ExternalIdPlayerLookup> ExternalIds => _externalIds;
+  public void AddExternalId(ExternalIdPlayerLookup id) => _externalIds.Add(id);
 }

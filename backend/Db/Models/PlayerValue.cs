@@ -10,7 +10,7 @@ public class PlayerValue
     public int Id { get; set; }
 
     [Column("data_source")]
-    public required DataSources DataSource { get; set; }
+    public required DataSource DataSource { get; set; }
 
     [Column("is_super_flex")]
     public required bool IsSuperFlex { get; set; }
