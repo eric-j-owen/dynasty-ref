@@ -1,12 +1,14 @@
 using System.Net.Http.Json;
 using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace DataPipeline.DataProviders;
 
-public class GetSleeperPlayers(HttpClient client) : IDataProvider<SleeperPlayer>
+public class GetSleeperPlayers(HttpClient client, ILogger<GetSleeperPlayers> logger) : IDataProvider<SleeperPlayer>
 {
     private readonly HttpClient _client = client;
+
     private readonly string _endpoint = "players/nfl";
 
     public async Task<List<SleeperPlayer>> ExtractDataAsync()
@@ -19,12 +21,13 @@ public class GetSleeperPlayers(HttpClient client) : IDataProvider<SleeperPlayer>
                 throw new Exception("ExtractSleeperPlayers: players is empty or null");
             }
 
+            logger.LogInformation("success: fetch players sleeper");
             return [.. json.Values];
         }
 
         catch (Exception e)
         {
-            Console.WriteLine($"ExtractSleeperPlayers error: {e}");
+            logger.LogError("error fetcching sleeper players: {e}", e);
             throw;
         }
     }

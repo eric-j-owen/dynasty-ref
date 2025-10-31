@@ -4,24 +4,29 @@ using DataPipeline.DTOs;
 using Shared.Consts;
 using System.Text.Json;
 using DataPipeline.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace DataPipeline.DataTransformers;
 
-public class SleeperPlayerTransformer : IDataTransformer<SleeperPlayer>
+public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) : IDataTransformer<SleeperPlayer>
 {
     private static readonly HashSet<string> _positions = [.. Enum.GetNames<PlayerConsts.IncludedPosition>()];
+
     public TransformResult Transform(List<SleeperPlayer> data)
     {
 
         List<Player> players = [];
         List<IncompletePlayerData> incompleteData = [];
 
+        logger.LogInformation("beginning data transform on {x} records", data.Count);
         var validPlayers = from record in data
                            where
                                 record.Positions != null &&
                                 record.Positions.Any(_positions.Contains) &&
                                 record.SleeperId != null
                            select record;
+        logger.LogInformation("returned {x} valid players", validPlayers.Count());
+
 
         foreach (var player in validPlayers)
         {
@@ -64,7 +69,11 @@ public class SleeperPlayerTransformer : IDataTransformer<SleeperPlayer>
             newPlayer.AddExternalId(sleeperId);
 
             players.Add(newPlayer);
+
         }
+
+        logger.LogInformation("transformed {x} players", players.Count);
+        logger.LogWarning("found {x} incomplete players", incompleteData.Count);
 
         return new TransformResult(players, null, null, incompleteData);
     }
