@@ -10,7 +10,8 @@ namespace DataPipeline.DataTransformers;
 
 public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) : IDataTransformer<SleeperPlayer>
 {
-    private static readonly HashSet<string> _positions = [.. Enum.GetNames<PlayerConsts.IncludedPosition>()];
+    private static readonly HashSet<string> _positions = [.. Enum.GetNames<IncludedPosition>()];
+    private static readonly HashSet<string> _teams = [.. Enum.GetNames<TeamAbbr>()];
 
     public TransformResult Transform(List<SleeperPlayer> data)
     {
@@ -19,14 +20,13 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
         List<IncompletePlayerData> incompleteData = [];
 
         logger.LogInformation("beginning data transform on {x} records", data.Count);
-        var validPlayers = from record in data
-                           where
-                                record.Positions != null &&
-                                record.Positions.Any(_positions.Contains) &&
-                                record.SleeperId != null
-                           select record;
-        logger.LogInformation("returned {x} valid players", validPlayers.Count());
 
+        var validPlayers = (from record in data
+                            where
+                                 record.Positions != null &&
+                                 record.Positions.Any(_positions.Contains) &&
+                                 record.SleeperId != null
+                            select record).ToList();
 
         foreach (var player in validPlayers)
         {
@@ -40,23 +40,25 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
                 incompleteData.Add(new IncompletePlayerData
                 {
                     RawData = JsonSerializer.Serialize(player),
-                    Reason = ApiConsts.IncompleteDataReason.MissingName,
+                    Reason = IncompleteDataReason.MissingName,
                 });
 
                 continue;
             }
 
-            var parsedPositions = player.Positions!
-                .Where(_positions.Contains)
-                .Select(Enum.Parse<PlayerConsts.IncludedPosition>)
+            var normalizedPositions = player.Positions!
+                .Select(NormalizeField.Position)
                 .ToArray();
+
+            var normalizedTeam = NormalizeField.Team(player.Team);
 
             var newPlayer = new Player
             {
                 NormalizedName = NormalizeField.Name(player.SearchFullName),
                 FirstName = player.FirstName,
                 LastName = player.LastName,
-                Positions = parsedPositions,
+                Positions = normalizedPositions,
+                Team = normalizedTeam
             };
 
             var sleeperId = new ExternalIdPlayerLookup
@@ -73,7 +75,7 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
         }
 
         logger.LogInformation("transformed {x} players", players.Count);
-        logger.LogWarning("found {x} incomplete players", incompleteData.Count);
+        logger.LogWarning("found {x} incomplete player data records", incompleteData.Count);
 
         return new TransformResult(players, null, null, incompleteData);
     }
