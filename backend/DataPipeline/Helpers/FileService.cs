@@ -2,20 +2,16 @@
 
 namespace DataPipeline.Helpers;
 
-public class FileService(string basePath = "../Data/json-data")
+public static class FileService
 {
-    private readonly string _basePath = basePath;
-
-    public void WriteToFileJson<T>(string fileName, T data)
+    static public void WriteToFileJson<T>(string fileName, T data)
     {
         string filePath = CreateFilePath(fileName);
         string json = JsonSerializer.Serialize(data);
         File.WriteAllText(filePath, json);
-
-        Console.WriteLine($"success: saved to {filePath}");
     }
 
-    public T? ReadFromFileJson<T>(string fileName)
+    static public T? ReadFromFileJson<T>(string fileName)
     {
         string filePath = CreateFilePath(fileName);
 
@@ -29,8 +25,9 @@ public class FileService(string basePath = "../Data/json-data")
         return JsonSerializer.Deserialize<T>(json);
     }
 
-    private string CreateFilePath(string fileName)
+    static private string CreateFilePath(string fileName)
     {
+        var _basePath = "../dataexplore";
         if (!Directory.Exists(_basePath))
         {
             Directory.CreateDirectory(_basePath);
