@@ -19,10 +19,10 @@ public class Player
   public required string LastName { get; set; }
 
   [Column("team")]
-  public PlayerConsts.Team? Team { get; set; }
+  public TeamAbbr? Team { get; set; }
 
   [Column("positions")]
-  public required PlayerConsts.IncludedPosition[] Positions { get; set; }
+  public required IncludedPosition[] Positions { get; set; }
 
   [Column("last_updated")]
   public DateTime LastUpdated { get; set; } = DateTime.UtcNow;

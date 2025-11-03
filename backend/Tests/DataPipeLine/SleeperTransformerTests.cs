@@ -1,6 +1,7 @@
 using DataPipeline.DataTransformers;
 using DataPipeline.DTOs;
 using Db.Models;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Consts;
 
 namespace Tests.DataPipeline;
@@ -10,7 +11,7 @@ public class SleeperTransformerTests
     [Fact]
     public void Transform_Returns_PlayerObjectWithExternalId()
     {
-        var transformer = new SleeperPlayerTransformer();
+        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
         var data = new List<SleeperPlayer>
         {
             new()
@@ -43,7 +44,7 @@ public class SleeperTransformerTests
     [Fact]
     public void Transform_ParsesAndFilters_Positions()
     {
-        var transformer = new SleeperPlayerTransformer();
+        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
         var data = new List<SleeperPlayer>
         {
             new()
@@ -80,7 +81,7 @@ public class SleeperTransformerTests
         {
             Assert.All(player.Positions, p =>
             {
-                Assert.IsType<PlayerConsts.IncludedPosition>(p);
+                Assert.IsType<IncludedPosition>(p);
             });
         }
 
@@ -89,7 +90,7 @@ public class SleeperTransformerTests
     public void Transform_Filters_IncompleteData()
     {
 
-        var transformer = new SleeperPlayerTransformer();
+        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
         var data = new List<SleeperPlayer>
         {
             new() {SleeperId="1", Positions=["QB"], FirstName="", LastName="b", SearchFullName=" b" },
@@ -105,14 +106,14 @@ public class SleeperTransformerTests
         Assert.Equal(3, actual.Count);
         foreach (var player in actual)
         {
-            Assert.Equal(ApiConsts.IncompleteDataReason.MissingName, player.Reason);
+            Assert.Equal(IncompleteDataReason.MissingName, player.Reason);
         }
     }
 
     [Fact]
     public void Transform_Filters_NonPlayerRecords()
     {
-        var transformer = new SleeperPlayerTransformer();
+        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
         var data = new List<SleeperPlayer>
         {
             new() {Positions = null},

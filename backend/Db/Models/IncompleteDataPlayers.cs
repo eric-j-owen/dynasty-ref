@@ -13,7 +13,7 @@ public class IncompletePlayerData
     public required string RawData { get; set; }
 
     [Column("reason")]
-    public required ApiConsts.IncompleteDataReason Reason { get; set; }
+    public required IncompleteDataReason Reason { get; set; }
 
     [Column("is_resolved")]
     public bool IsResolved { get; set; } = false;
