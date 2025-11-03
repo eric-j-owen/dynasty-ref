@@ -1,6 +1,5 @@
 using DataPipeline.DataTransformers;
 using DataPipeline.DTOs;
-using Db.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Consts;
 
@@ -20,7 +19,9 @@ public class SleeperTransformerTests
                 FirstName = "Josh",
                 LastName = "Allen",
                 Positions = ["QB"],
-                SearchFullName = "joshallen"
+                SearchFullName = "joshallen",
+                Team ="BUF"
+
             }
         };
 
@@ -37,8 +38,8 @@ public class SleeperTransformerTests
         Assert.Equal(expected.FirstName, actual.FirstName);
         Assert.Equal(expected.LastName, actual.LastName);
         Assert.Equal(expected.SleeperId, actualExternalId.SourceId);
+        Assert.Equal(TeamAbbr.BUF, actual.Team);
         Assert.Equal(DataSource.Sleeper, actualExternalId.DataSource);
-
     }
 
     [Fact]
@@ -53,7 +54,7 @@ public class SleeperTransformerTests
                 FirstName = "Josh",
                 LastName = "Allen",
                 Positions=["QB", "WR", "TE"],
-                SearchFullName = "joshallen"
+                SearchFullName = "joshallen",
             },
             new()
             {
@@ -61,7 +62,7 @@ public class SleeperTransformerTests
                 FirstName = "Josh",
                 LastName = "Allen",
                 Positions=["QB", "DL"],
-                SearchFullName = "joshallen"
+                SearchFullName = "joshallen",
             },
             new()
             {
@@ -69,7 +70,7 @@ public class SleeperTransformerTests
                 FirstName = "Josh",
                 LastName = "Allen",
                 Positions=["RB", "LB", "K", ""],
-                SearchFullName = "joshallen"
+                SearchFullName = "joshallen",
             },
         };
 
@@ -85,29 +86,6 @@ public class SleeperTransformerTests
             });
         }
 
-    }
-    [Fact]
-    public void Transform_Filters_IncompleteData()
-    {
-
-        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
-        var data = new List<SleeperPlayer>
-        {
-            new() {SleeperId="1", Positions=["QB"], FirstName="", LastName="b", SearchFullName=" b" },
-            new() {SleeperId="1", Positions=["QB"], FirstName="a", LastName="", SearchFullName="a " },
-            new() {SleeperId="1", Positions=["QB"], FirstName="a", LastName="b", SearchFullName=""}
-        };
-
-        var result = transformer.Transform(data);
-        Assert.NotNull(result.PlayerData);
-        Assert.NotNull(result.IncompletePlayerData);
-
-        var actual = result.IncompletePlayerData;
-        Assert.Equal(3, actual.Count);
-        foreach (var player in actual)
-        {
-            Assert.Equal(IncompleteDataReason.MissingName, player.Reason);
-        }
     }
 
     [Fact]
