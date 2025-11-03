@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Db.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,24 +15,7 @@ namespace Db.Migrations
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:data_source", "keep_trade_cut,fantasy_calc,sleeper,dynasty_process,reddit")
                 .Annotation("Npgsql:Enum:included_position", "qb,wr,rb,te")
-                .Annotation("Npgsql:Enum:incomplete_data_reason", "missing_id,missing_name")
-                .Annotation("Npgsql:Enum:team", "buf,mia,ne,nyj,dal,nyg,phi,was,bal,cin,cle,pit,chi,det,gb,min,hou,ind,jax,ten,atl,car,no,tb,den,kc,lv,lac,ari,lar,sf,sea");
-
-            migrationBuilder.CreateTable(
-                name: "incomplete_data_players",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    raw_data = table.Column<string>(type: "jsonb", nullable: false),
-                    reason = table.Column<int>(type: "integer", nullable: false),
-                    is_resolved = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_incomplete_data_players", x => x.id);
-                });
+                .Annotation("Npgsql:Enum:team_abbr", "buf,mia,ne,nyj,dal,nyg,phi,was,bal,cin,cle,pit,chi,det,gb,min,hou,ind,jax,ten,atl,car,no,tb,den,kc,lv,lac,ari,lar,sf,sea,null_team");
 
             migrationBuilder.CreateTable(
                 name: "players",
@@ -43,7 +26,7 @@ namespace Db.Migrations
                     normalized_name = table.Column<string>(type: "text", nullable: false),
                     first_name = table.Column<string>(type: "text", nullable: false),
                     last_name = table.Column<string>(type: "text", nullable: false),
-                    team = table.Column<int>(type: "integer", nullable: true),
+                    team = table.Column<int>(type: "integer", nullable: false),
                     positions = table.Column<int[]>(type: "integer[]", nullable: false),
                     last_updated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -110,9 +93,6 @@ namespace Db.Migrations
         {
             migrationBuilder.DropTable(
                 name: "external_id_player_lookup");
-
-            migrationBuilder.DropTable(
-                name: "incomplete_data_players");
 
             migrationBuilder.DropTable(
                 name: "player_values");

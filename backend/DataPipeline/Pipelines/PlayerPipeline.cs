@@ -18,12 +18,6 @@ public class PlayerPipeline(
             var dataExtract = await provider.ExtractDataAsync();
             var transformedData = transformer.Transform(dataExtract);
 
-            if (transformedData?.IncompletePlayerData?.Count > 0)
-            {
-                var count = transformedData.IncompletePlayerData.Count;
-                logger.LogWarning("found {count} incomplete data records", count);
-            }
-
             if (transformedData?.PlayerData?.Count > 0)
             {
                 await loader.LoadData(transformedData.PlayerData);

@@ -14,12 +14,10 @@ namespace Db
         public DbSet<Player> Players { get; set; }
         public DbSet<PlayerValue> PlayerValues { get; set; }
         public DbSet<ExternalIdPlayerLookup> ExternalIdPlayerLookups { get; set; }
-        public DbSet<IncompletePlayerData> IncompletePlayerDatas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresEnum<DataSource>();
-            modelBuilder.HasPostgresEnum<IncompleteDataReason>();
             modelBuilder.HasPostgresEnum<TeamAbbr>();
             modelBuilder.HasPostgresEnum<IncludedPosition>();
         }

@@ -11,13 +11,12 @@ namespace DataPipeline.DataTransformers;
 public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) : IDataTransformer<SleeperPlayer>
 {
     private static readonly HashSet<string> _positions = [.. Enum.GetNames<IncludedPosition>()];
-    private static readonly HashSet<string> _teams = [.. Enum.GetNames<TeamAbbr>()];
 
     public TransformResult Transform(List<SleeperPlayer> data)
     {
 
         List<Player> players = [];
-        List<IncompletePlayerData> incompleteData = [];
+        List<SleeperPlayer> incompleteData = [];
 
         logger.LogInformation("beginning data transform on {x} records", data.Count);
 
@@ -37,12 +36,7 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
                 string.IsNullOrEmpty(player.LastName)
             )
             {
-                incompleteData.Add(new IncompletePlayerData
-                {
-                    RawData = JsonSerializer.Serialize(player),
-                    Reason = IncompleteDataReason.MissingName,
-                });
-
+                incompleteData.Add(player);
                 continue;
             }
 
@@ -58,7 +52,8 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
                 FirstName = player.FirstName,
                 LastName = player.LastName,
                 Positions = normalizedPositions,
-                Team = normalizedTeam
+                Team = normalizedTeam,
+                LastUpdated = DateTime.UtcNow
             };
 
             var sleeperId = new ExternalIdPlayerLookup
@@ -76,7 +71,9 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
 
         logger.LogInformation("transformed {x} players", players.Count);
         logger.LogWarning("found {x} incomplete player data records", incompleteData.Count);
+        FileService.WriteToFileJson($"incomplete_players", incompleteData);
 
-        return new TransformResult(players, null, null, incompleteData);
+
+        return new TransformResult(players);
     }
 }

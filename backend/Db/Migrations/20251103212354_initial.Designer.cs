@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Db.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251102172630_Initial")]
-    partial class Initial
+    [Migration("20251103212354_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,8 +25,7 @@ namespace Db.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "data_source", new[] { "keep_trade_cut", "fantasy_calc", "sleeper", "dynasty_process", "reddit" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "included_position", new[] { "qb", "wr", "rb", "te" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "incomplete_data_reason", new[] { "missing_id", "missing_name" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "team", new[] { "buf", "mia", "ne", "nyj", "dal", "nyg", "phi", "was", "bal", "cin", "cle", "pit", "chi", "det", "gb", "min", "hou", "ind", "jax", "ten", "atl", "car", "no", "tb", "den", "kc", "lv", "lac", "ari", "lar", "sf", "sea" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "team_abbr", new[] { "buf", "mia", "ne", "nyj", "dal", "nyg", "phi", "was", "bal", "cin", "cle", "pit", "chi", "det", "gb", "min", "hou", "ind", "jax", "ten", "atl", "car", "no", "tb", "den", "kc", "lv", "lac", "ari", "lar", "sf", "sea", "null_team" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Db.Models.ExternalIdPlayerLookup", b =>
@@ -48,37 +47,6 @@ namespace Db.Migrations
                     b.HasIndex("PlayerId");
 
                     b.ToTable("external_id_player_lookup");
-                });
-
-            modelBuilder.Entity("Db.Models.IncompletePlayerData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreateddAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsResolved")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_resolved");
-
-                    b.Property<string>("RawData")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("raw_data");
-
-                    b.Property<int>("Reason")
-                        .HasColumnType("integer")
-                        .HasColumnName("reason");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("incomplete_data_players");
                 });
 
             modelBuilder.Entity("Db.Models.Player", b =>
@@ -114,7 +82,7 @@ namespace Db.Migrations
                         .HasColumnType("integer[]")
                         .HasColumnName("positions");
 
-                    b.Property<int?>("Team")
+                    b.Property<int>("Team")
                         .HasColumnType("integer")
                         .HasColumnName("team");
 
