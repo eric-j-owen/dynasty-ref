@@ -1,3 +1,7 @@
+appsettings.Development.json
+dataexplore
+testData
+
 /Tests/TestData
 /dataexplore
 appsettings.dev.json
