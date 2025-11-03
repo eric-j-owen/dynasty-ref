@@ -19,13 +19,13 @@ public class Player
   public required string LastName { get; set; }
 
   [Column("team")]
-  public TeamAbbr? Team { get; set; }
+  public required TeamAbbr Team { get; set; }
 
   [Column("positions")]
   public required IncludedPosition[] Positions { get; set; }
 
   [Column("last_updated")]
-  public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+  public required DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
 
   private readonly List<ExternalIdPlayerLookup> _externalIds = [];
