@@ -1,6 +1,6 @@
 namespace DataPipeline.Interfaces;
 
-interface IDataProvider<T>
+public interface IDataProvider<T>
 {
     Task<List<T>> ExtractDataAsync();
 }

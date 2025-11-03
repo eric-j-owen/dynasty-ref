@@ -1,7 +1,7 @@
 using Db.Models;
 namespace DataPipeline.Interfaces;
 
-interface IDataTransformer<T>
+public interface IDataTransformer<T>
 {
     TransformResult Transform(List<T> data);
 }

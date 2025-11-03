@@ -1,6 +1,6 @@
 namespace DataPipeline.Interfaces;
 
-interface IPipeline
+public interface IPipeline
 {
     Task RunAsync();
 }

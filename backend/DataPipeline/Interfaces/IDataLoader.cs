@@ -1,6 +1,6 @@
 namespace DataPipeline.Interfaces;
 
-interface IDataLoader<T>
+public interface IDataLoader<T>
 {
     Task<int> LoadData(List<T> data);
 }

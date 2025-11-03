@@ -53,7 +53,7 @@ builder.Services.AddTransient<IDataTransformer<SleeperPlayer>, SleeperPlayerTran
 builder.Services.AddTransient<IDataLoader<Player>, PlayerUpsertLoader>();
 
 //pipelines
-builder.Services.AddTransient<SleeperPlayerPipeline>();
+builder.Services.AddTransient<PlayerPipeline>();
 
 
 // builder.Services.AddHttpClient<KtcValuesScraper>(client =>
@@ -75,7 +75,7 @@ try
     var arg = args[0];
     IPipeline service = arg switch
     {
-        "players" => host.Services.GetRequiredService<SleeperPlayerPipeline>(),
+        "players" => host.Services.GetRequiredService<PlayerPipeline>(),
         _ => throw new Exception("invalid argument"),
     };
 
