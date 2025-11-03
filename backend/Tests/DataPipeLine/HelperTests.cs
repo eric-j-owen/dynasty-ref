@@ -1,4 +1,6 @@
 using DataPipeline.Helpers;
+using Shared.Consts;
+
 
 namespace Tests.DataPipeline
 {
@@ -38,12 +40,24 @@ namespace Tests.DataPipeline
         }
 
         [Theory]
-        [InlineData("RB5", "RB")]
-        [InlineData("TE13", "TE")]
-        public void Position_IsNormalized(string input, string expected)
+        [InlineData("RB5", IncludedPosition.RB)]
+        [InlineData("TE13", IncludedPosition.TE)]
+        public void Position_IsNormalized(string input, IncludedPosition expected)
         {
             var actual = NormalizeField.Position(input);
             Assert.Equal(expected, actual);
+        }
+
+        [Theory]
+        [InlineData("SFO", TeamAbbr.SF)]
+        [InlineData("NOS", TeamAbbr.NO)]
+        [InlineData("FA", TeamAbbr.NullTeam)]
+        [InlineData(null, TeamAbbr.NullTeam)]
+        public void Team_isMappedAndNormalized(string? input, TeamAbbr expected)
+        {
+            var actual = NormalizeField.Team(input);
+            Assert.Equal(expected, actual);
+
         }
     }
 

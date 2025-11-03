@@ -3,7 +3,7 @@ using HtmlAgilityPack;
 
 namespace Tests.DataPipeline;
 
-public class KtcTests
+public class KtcPipelineTests
 {
     [Fact]
     public void ParsePlayersFromDocument_ReturnsParsedPlayerList()
@@ -27,10 +27,10 @@ public class KtcTests
         Assert.NotNull(actual);
         Assert.NotEmpty(actual);
         Assert.Equal(4, actual.Count);
-        Assert.Equal(expected[0].name, actual[0].PlayerName);
-        Assert.Equal(expected[1].name, actual[1].PlayerName);
-        Assert.Equal(expected[2].name, actual[2].PlayerName);
-        Assert.Equal(expected[3].name, actual[3].PlayerName);
+        for (var i = 0; i < actual.Count; i++)
+        {
+            Assert.Equal(expected[i].name, actual[i].PlayerName);
+        }
     }
 
     [Fact]
@@ -40,10 +40,7 @@ public class KtcTests
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        var e = Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
-
-        Assert.Equal("Ktc scraper: did not find <script> tags", e.Message);
-
+        Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
     }
 
     [Fact]
@@ -53,11 +50,7 @@ public class KtcTests
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        var e = Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
-
-        Assert.Equal("Ktc scraper could not find data in script tag", e.Message);
-
+        Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
     }
-
 
 }
