@@ -3,11 +3,11 @@ using DataPipeline.DataProviders;
 
 namespace DataPipeline.Services;
 
-public class KtcService
+public class KtcPipeline
 {
     private readonly KtcValuesScraper _scraper;
 
-    public KtcService(KtcValuesScraper scraper)
+    public KtcPipeline(KtcValuesScraper scraper)
     {
         _scraper = scraper;
     }
