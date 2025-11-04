@@ -1,0 +1,9 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0@sha256:81f6d622fe21ed9d31375167f62a3538ff4d6835f9d5e6da9c2defa8a84b7687 AS build
+WORKDIR /App
+COPY . ./
+RUN dotnet publish DataPipeline/DataPipeline.csproj -o /App/out
+
+FROM mcr.microsoft.com/dotnet/runtime:9.0@sha256:ac1ed72ea0958371d3f23b81e899d92311d465af873f9792f9e3ce383f506cad
+WORKDIR /App
+COPY --from=build /App/out .
+ENTRYPOINT [ "dotnet", "DataPipeline.dll" ]
