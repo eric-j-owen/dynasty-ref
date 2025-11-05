@@ -5,7 +5,7 @@ function App() {
 
   const test = async () => {
     try {
-      const res = await fetch("http://localhost:5001/hello");
+      const res = await fetch("/api/hello");
       const data = await res.text();
       setMsg(data);
     } catch (e: unknown) {
