@@ -5,5 +5,9 @@ RUN dotnet publish ClientApi/ClientApi.csproj -o /App/out
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0@sha256:3dcb33395722d14c80d19107158293ed677b2c07841100d51df07275ae2b2682
 WORKDIR /App
+
 COPY --from=build /App/out .
+
+USER app
+
 ENTRYPOINT [ "dotnet", "ClientApi.dll" ]
