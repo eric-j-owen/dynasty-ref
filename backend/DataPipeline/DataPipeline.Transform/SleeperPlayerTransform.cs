@@ -70,9 +70,7 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
         }
 
         logger.LogInformation("transformed {x} players", players.Count);
-        logger.LogWarning("found {x} incomplete player data records", incompleteData.Count);
-        FileService.WriteToFileJson($"incomplete_players", incompleteData);
-
+        logger.LogWarning("found {x} incomplete player data records {players}", incompleteData.Count, JsonSerializer.Serialize(incompleteData));
 
         return new TransformResult(players);
     }
