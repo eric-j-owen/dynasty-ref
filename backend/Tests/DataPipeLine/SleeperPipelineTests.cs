@@ -23,8 +23,25 @@ public class TestDataBaseFixture
                 using var context = CreateContext();
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
-                _databaseInitialized = true;
+
+                var player = new Player
+                {
+                    FirstName = "old",
+                    LastName = "player",
+                    NormalizedName = "oldplayer",
+                    Team = TeamAbbr.CLE,
+                    Positions = [IncludedPosition.QB],
+                    LastUpdated = DateTime.UtcNow
+                };
+                player.AddExternalId(new ExternalIdPlayerLookup
+                {
+                    DataSource = DataSource.Sleeper,
+                    SourceId = "1",
+                    Player = player
+                });
+                context.Add(player);
             }
+            _databaseInitialized = true;
         }
     }
 
@@ -70,9 +87,45 @@ public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<T
         await loader.LoadData(new List<Player> { player });
 
         context.ChangeTracker.Clear();
-        var saved = await context.Players.FirstAsync(p => p.NormalizedName == "testplayer", TestContext.Current.CancellationToken);
+
+        var saved = await context.Players.SingleAsync(p => p.LastName == "player", TestContext.Current.CancellationToken);
 
         Assert.Equal("test", saved.FirstName);
+    }
+
+    [Fact]
+    public async Task LoadData_ExistingPlayer_updates()
+    {
+        using var context = Fixture.CreateContext();
+        context.Database.BeginTransaction();
+        var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
+
+        var updatedPlayer = new Player
+        {
+
+            FirstName = "new",
+            LastName = "player",
+            NormalizedName = "newplayer",
+            Team = TeamAbbr.CLE,
+            Positions = [IncludedPosition.QB],
+            LastUpdated = DateTime.UtcNow
+        };
+        updatedPlayer.AddExternalId(new ExternalIdPlayerLookup
+        {
+            DataSource = DataSource.Sleeper,
+            SourceId = "1",
+            Player = updatedPlayer
+        });
+
+        await loader.LoadData(new List<Player> { updatedPlayer });
+        context.ChangeTracker.Clear();
+        var updated = await context.Players
+            .Include(p => p.ExternalIds)
+            .SingleAsync(p => p.LastName == "player", TestContext.Current.CancellationToken);
+
+        Assert.Equal("new", updated.FirstName);
+        Assert.Single(context.Players);
+        Assert.Single(context.Players.First().ExternalIds);
     }
 
 }
