@@ -1,11 +1,15 @@
-using Db;
 using Microsoft.EntityFrameworkCore;
+using Db;
+using Db.Models;
+using Shared.Consts;
+using DataPipeline.Loaders;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.DataPipeline;
 
-class TestDataBaseFixture
+public class TestDataBaseFixture
 {
-    private const string ConnectionString = @"Host=localhost;Database=dynastydb;Username=username;Password=password";
+    private const string ConnectionString = @"Host=localhost;Database=test_dynasty_db;Username=username;Password=password";
 
     private static readonly object _lock = new();
     private static bool _databaseInitialized;
@@ -24,10 +28,51 @@ class TestDataBaseFixture
         }
     }
 
-    public static AppDbContext CreateContext()
+    public AppDbContext CreateContext()
         => new(
             new DbContextOptionsBuilder<AppDbContext>()
                 .UseNpgsql(ConnectionString)
                 .Options);
 }
 
+
+public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<TestDataBaseFixture>
+{
+    public TestDataBaseFixture Fixture { get; } = fixture;
+
+
+    [Fact]
+    public async Task LoadData_NewPlayer_AddsToDb()
+    {
+        using var context = Fixture.CreateContext();
+        context.Database.BeginTransaction();
+
+        var player = new Player
+        {
+            FirstName = "test",
+            LastName = "player",
+            NormalizedName = "testplayer",
+            Team = TeamAbbr.CLE,
+            Positions = [IncludedPosition.QB],
+            LastUpdated = DateTime.UtcNow
+        };
+
+        player.AddExternalId(
+            new ExternalIdPlayerLookup
+            {
+                DataSource = DataSource.Sleeper,
+                SourceId = "1",
+                Player = player
+            }
+        );
+
+        var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
+        await loader.LoadData(new List<Player> { player });
+
+        context.ChangeTracker.Clear();
+        var saved = await context.Players.FirstAsync(p => p.NormalizedName == "testplayer", TestContext.Current.CancellationToken);
+
+        Assert.Equal("test", saved.FirstName);
+    }
+
+}
