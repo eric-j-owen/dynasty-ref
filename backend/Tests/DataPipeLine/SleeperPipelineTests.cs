@@ -40,6 +40,7 @@ public class TestDataBaseFixture
                     Player = player
                 });
                 context.Add(player);
+                context.SaveChanges();
             }
             _databaseInitialized = true;
         }
@@ -99,6 +100,8 @@ public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<T
         using var context = Fixture.CreateContext();
         context.Database.BeginTransaction();
         var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
+
+        Assert.Single(context.Players); // just checking if seeded data is present before upsert
 
         var updatedPlayer = new Player
         {
