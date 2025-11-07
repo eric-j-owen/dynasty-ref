@@ -3,21 +3,23 @@ using CsvHelper;
 using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
 
-namespace DataPipeline.DataProviders;
+namespace DataPipeline.DataPipeline.DataProviders;
 
-public class GetDynastyProcessPlayers(HttpClient client) : IDataProvider<DynastyProcessPlayer>
+public class GetDynastyProcessIds(HttpClient client) : IDataProvider<DynastyProcessIdsDto>
 {
     private readonly HttpClient _client = client;
-    private readonly string _endpoint = "db_playerids.csv";
-    public async Task<List<DynastyProcessPlayer>> ExtractDataAsync()
+    private readonly string _endpoint = "/repos/dynastyprocess/data/contents/files/db_playerids.csv";
+    public async Task<List<DynastyProcessIdsDto>> ExtractDataAsync()
     {
         try
         {
+
+
             var stream = await _client.GetStreamAsync(_endpoint);
             using (var reader = new StreamReader(stream))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                var records = csv.GetRecords<DynastyProcessPlayer>().ToList();
+                var records = csv.GetRecords<DynastyProcessIdsDto>().ToList();
 
                 if (records == null || records.Count == 0)
                 {

@@ -2,20 +2,18 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-// using System.Net.Http.Headers;
 using Db;
+using Db.Models;
 using Shared.Consts;
-using DataPipeline.Loaders;
-using DataPipeline.DataProviders;
+using DataPipeline.DataPipeline.Loaders;
+using DataPipeline.DataPipeline.DataProviders;
 using DataPipeline.Pipelines;
 using DataPipeline.Interfaces;
-using DataPipeline.DataTransformers;
+using DataPipeline.DataPipeline.Transform;
 using DataPipeline.DTOs;
-using Db.Models;
-// using DataPipeline.Services;
-// using DataPipeline.Interfaces;
-// using DataPipeline.DataProviders;
-// using Shared.Consts;
+using DataPipeline.Datapipeline.Transform;
+using DataPipeline.DataPipeline.Load;
+
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
@@ -27,41 +25,40 @@ builder.Configuration
 builder.Services.AddDbContextPool<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-
-
-
-// builder.Services.AddHttpClient<GetDynastyProcessPlayers>(client =>
-// {
-//     client.BaseAddress = new Uri(ApiConsts.BaseUrl.DynastyProcess);
-//     client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
-//     client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.raw+json");
-//     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", "");
-
-// });
-
 // data providers
-builder.Services.AddHttpClient<IDataProvider<SleeperPlayer>, GetSleeperPlayers>(client =>
+builder.Services.AddHttpClient<IDataProvider<SleeperPlayerDto>, GetSleeperPlayers>(client =>
 {
     client.BaseAddress = new Uri(ApiBaseUrl.Sleeper);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
-//transformers
-builder.Services.AddTransient<IDataTransformer<SleeperPlayer>, SleeperPlayerTransformer>();
-
-//loaders
-builder.Services.AddTransient<IDataLoader<Player>, PlayerUpsertLoader>();
-
-//pipelines
-builder.Services.AddTransient<PlayerPipeline>();
-
+builder.Services.AddHttpClient<IDataProvider<DynastyProcessIdsDto>, GetDynastyProcessIds>(client =>
+{
+    client.BaseAddress = new Uri(ApiBaseUrl.Github);
+    client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.raw+json");
+    client.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2022-11-28");
+    client.DefaultRequestHeaders.Add("User-Agent", "dynasty-ref");
+    client.DefaultRequestHeaders.Add
+        ("Authorization", builder.Configuration["ApiKeys:Github"]);
+});
 
 // builder.Services.AddHttpClient<KtcValuesScraper>(client =>
 // {
 //     client.BaseAddress = new Uri(ApiConsts.BaseUrl.Ktc);
 //     client.DefaultRequestHeaders.Add("User-Agent", ApiConsts.Config.UserAgent);
 // });
+
+//transformers
+builder.Services.AddTransient<IDataTransformer<SleeperPlayerDto>, SleeperPlayerTransformer>();
+builder.Services.AddTransient<IDataTransformer<DynastyProcessIdsDto>, ExternalIdTransform>();
+
+//loaders
+builder.Services.AddTransient<IDataLoader<PlayerModel>, PlayerUpsertLoader>();
+builder.Services.AddTransient<IDataLoader<ExternalIdModel>, ExternalIdsLoader>();
+
+//pipelines
+builder.Services.AddTransient<RunPipeline<SleeperPlayerDto>>();
+builder.Services.AddTransient<RunPipeline<DynastyProcessIdsDto>>();
 
 
 using IHost host = builder.Build();
@@ -76,7 +73,8 @@ try
     var arg = args[0];
     IPipeline service = arg switch
     {
-        "players" => host.Services.GetRequiredService<PlayerPipeline>(),
+        "players" => host.Services.GetRequiredService<RunPipeline<SleeperPlayerDto>>(),
+        "ids" => host.Services.GetRequiredService<RunPipeline<DynastyProcessIdsDto>>(),
         _ => throw new Exception("invalid argument"),
     };
 
