@@ -4,7 +4,7 @@ using Shared.Consts;
 namespace Db.Models;
 
 [Table("players")]
-public class Player
+public class PlayerModel
 {
   [Column("id")]
   public int Id { get; set; }
@@ -28,7 +28,7 @@ public class Player
   public required DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
 
-  private readonly List<ExternalIdPlayerLookup> _externalIds = [];
-  public IEnumerable<ExternalIdPlayerLookup> ExternalIds => _externalIds;
-  public void AddExternalId(ExternalIdPlayerLookup id) => _externalIds.Add(id);
+  private readonly List<ExternalIdModel> _externalIds = [];
+  public IEnumerable<ExternalIdModel> ExternalIds => _externalIds;
+  public void AddExternalId(ExternalIdModel id) => _externalIds.Add(id);
 }

@@ -7,7 +7,7 @@ public interface IDataTransformer<T>
 }
 
 public record TransformResult(
-    List<Player>? PlayerData = null,
-    List<ExternalIdPlayerLookup>? ExternalIdPlayerData = null,
-    List<PlayerValue>? PlayerValueData = null
+    List<PlayerModel>? PlayerData = null,
+    List<ExternalIdModel>? ExternalIdPlayerData = null,
+    List<PlayerValueModel>? PlayerValueData = null
 );

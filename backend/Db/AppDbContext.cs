@@ -11,9 +11,9 @@ namespace Db
         {
         }
 
-        public DbSet<Player> Players { get; set; }
-        public DbSet<PlayerValue> PlayerValues { get; set; }
-        public DbSet<ExternalIdPlayerLookup> ExternalIdPlayerLookups { get; set; }
+        public DbSet<PlayerModel> Players { get; set; }
+        public DbSet<PlayerValueModel> PlayerValues { get; set; }
+        public DbSet<ExternalIdModel> ExternalIdPlayerLookups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

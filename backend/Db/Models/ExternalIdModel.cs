@@ -6,7 +6,7 @@ namespace Db.Models;
 
 [Table("external_id_player_lookup")]
 [PrimaryKey(nameof(DataSource), nameof(SourceId))]
-public class ExternalIdPlayerLookup
+public class ExternalIdModel
 {
     [Column("data_source")]
     public required DataSource DataSource { get; set; }
@@ -15,10 +15,9 @@ public class ExternalIdPlayerLookup
     public required string SourceId { get; set; }
 
 
-
     [Column("player_id")]
     public int PlayerId { get; set; }
 
     [ForeignKey(nameof(PlayerId))]
-    public required Player Player { get; set; }
+    public required PlayerModel Player { get; set; }
 }

@@ -1,9 +1,10 @@
 using DataPipeline.DataProviders;
+using DataPipeline.DTOs;
 using HtmlAgilityPack;
 
 namespace Tests.DataPipeline;
 
-public class KtcPipelineTests
+public class KtcTests
 {
     [Fact]
     public void ParsePlayersFromDocument_ReturnsParsedPlayerList()
@@ -16,21 +17,20 @@ public class KtcPipelineTests
 
         var actual = KtcValuesScraper.ParsePlayersFromDocument(html);
 
-        var expected = new[]
+        var expected = new KtcScrapedPlayerDto
         {
-            new {name = "Josh Allen"},
-            new {name = "Bijan Robinson"},
-            new {name = "Ja'Marr Chase"},
-            new {name = "Puka Nacua"},
+            KtcId = 365,
+            OneQbValues = new KtcValueData { Value = 8147 },
+            SuperFlexValues = new KtcValueData { Value = 9992 }
         };
+
 
         Assert.NotNull(actual);
         Assert.NotEmpty(actual);
         Assert.Equal(4, actual.Count);
-        for (var i = 0; i < actual.Count; i++)
-        {
-            Assert.Equal(expected[i].name, actual[i].PlayerName);
-        }
+        Assert.Equal(expected.KtcId, actual.First().KtcId);
+        Assert.Equal(expected.OneQbValues.Value, actual.First().OneQbValues.Value);
+        Assert.Equal(expected.SuperFlexValues.Value, actual.First().SuperFlexValues.Value);
     }
 
     [Fact]

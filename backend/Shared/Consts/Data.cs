@@ -11,7 +11,7 @@ public static class ApiBaseUrl
     public const string Ktc = "https://keeptradecut.com/";
     public const string Fc = "https://api.fantasycalc.com/";
     public const string Sleeper = "https://api.sleeper.app/v1/";
-    public const string DynastyProcess = "https://api.github.com/repos/dynastyprocess/data/contents/files/";
+    public const string Github = "https://api.github.com";
 }
 
 

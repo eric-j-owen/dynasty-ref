@@ -4,7 +4,7 @@ namespace Db.Models;
 
 
 [Table("player_values")]
-public class PlayerValue
+public class PlayerValueModel
 {
     [Column("id")]
     public int Id { get; set; }
@@ -27,5 +27,5 @@ public class PlayerValue
     public int PlayerId { get; set; }
 
     [ForeignKey(nameof(PlayerId))]
-    public required Player Player { get; set; }
+    public required PlayerModel Player { get; set; }
 }

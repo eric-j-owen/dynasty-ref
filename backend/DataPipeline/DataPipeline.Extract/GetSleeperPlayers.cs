@@ -3,19 +3,19 @@ using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace DataPipeline.DataProviders;
+namespace DataPipeline.DataPipeline.DataProviders;
 
-public class GetSleeperPlayers(HttpClient client, ILogger<GetSleeperPlayers> logger) : IDataProvider<SleeperPlayer>
+public class GetSleeperPlayers(HttpClient client, ILogger<GetSleeperPlayers> logger) : IDataProvider<SleeperPlayerDto>
 {
     private readonly HttpClient _client = client;
 
     private readonly string _endpoint = "players/nfl";
 
-    public async Task<List<SleeperPlayer>> ExtractDataAsync()
+    public async Task<List<SleeperPlayerDto>> ExtractDataAsync()
     {
         try
         {
-            var json = await _client.GetFromJsonAsync<Dictionary<string, SleeperPlayer>>(_endpoint);
+            var json = await _client.GetFromJsonAsync<Dictionary<string, SleeperPlayerDto>>(_endpoint);
             if (json == null || json.Count == 0)
             {
                 throw new Exception("ExtractSleeperPlayers: players is empty or null");

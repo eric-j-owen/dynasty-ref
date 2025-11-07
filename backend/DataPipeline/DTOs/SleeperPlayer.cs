@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace DataPipeline.DTOs;
 
-public class SleeperPlayer
+public record SleeperPlayerDto
 {
     [JsonPropertyName("player_id")]
     public string? SleeperId { get; set; }

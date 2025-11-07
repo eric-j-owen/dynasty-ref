@@ -6,17 +6,17 @@ using System.Text.Json;
 using DataPipeline.Helpers;
 using Microsoft.Extensions.Logging;
 
-namespace DataPipeline.DataTransformers;
+namespace DataPipeline.DataPipeline.Transform;
 
-public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) : IDataTransformer<SleeperPlayer>
+public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) : IDataTransformer<SleeperPlayerDto>
 {
     private static readonly HashSet<string> _positions = [.. Enum.GetNames<IncludedPosition>()];
 
-    public TransformResult Transform(List<SleeperPlayer> data)
+    public TransformResult Transform(List<SleeperPlayerDto> data)
     {
 
-        List<Player> players = [];
-        List<SleeperPlayer> incompleteData = [];
+        List<PlayerModel> players = [];
+        List<SleeperPlayerDto> incompleteData = [];
 
         logger.LogInformation("beginning data transform on {x} records", data.Count);
 
@@ -46,7 +46,7 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
 
             var normalizedTeam = NormalizeField.Team(player.Team);
 
-            var newPlayer = new Player
+            var newPlayer = new PlayerModel
             {
                 NormalizedName = NormalizeField.Name(player.SearchFullName),
                 FirstName = player.FirstName,
@@ -56,7 +56,7 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
                 LastUpdated = DateTime.UtcNow
             };
 
-            var sleeperId = new ExternalIdPlayerLookup
+            var sleeperId = new ExternalIdModel
             {
                 DataSource = DataSource.Sleeper,
                 SourceId = player.SleeperId!,

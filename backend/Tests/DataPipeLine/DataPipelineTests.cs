@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Db;
 using Db.Models;
 using Shared.Consts;
-using DataPipeline.Loaders;
+using DataPipeline.DataPipeline.Loaders;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.DataPipeline;
@@ -24,7 +24,7 @@ public class TestDataBaseFixture
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
 
-                var player = new Player
+                var player = new PlayerModel
                 {
                     FirstName = "old",
                     LastName = "player",
@@ -33,7 +33,7 @@ public class TestDataBaseFixture
                     Positions = [IncludedPosition.QB],
                     LastUpdated = DateTime.UtcNow
                 };
-                player.AddExternalId(new ExternalIdPlayerLookup
+                player.AddExternalId(new ExternalIdModel
                 {
                     DataSource = DataSource.Sleeper,
                     SourceId = "1",
@@ -54,10 +54,9 @@ public class TestDataBaseFixture
 }
 
 
-public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<TestDataBaseFixture>
+public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataBaseFixture>
 {
     public TestDataBaseFixture Fixture { get; } = fixture;
-
 
     [Fact]
     public async Task LoadData_NewPlayer_AddsToDb()
@@ -65,7 +64,7 @@ public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<T
         using var context = Fixture.CreateContext();
         context.Database.BeginTransaction();
 
-        var player = new Player
+        var player = new PlayerModel
         {
             FirstName = "test",
             LastName = "player",
@@ -76,7 +75,7 @@ public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<T
         };
 
         player.AddExternalId(
-            new ExternalIdPlayerLookup
+            new ExternalIdModel
             {
                 DataSource = DataSource.Sleeper,
                 SourceId = "1",
@@ -85,7 +84,7 @@ public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<T
         );
 
         var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
-        await loader.LoadData(new List<Player> { player });
+        await loader.LoadData(new List<PlayerModel> { player });
 
         context.ChangeTracker.Clear();
 
@@ -103,7 +102,7 @@ public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<T
 
         Assert.Single(context.Players); // just checking if seeded data is present before upsert
 
-        var updatedPlayer = new Player
+        var updatedPlayer = new PlayerModel
         {
 
             FirstName = "new",
@@ -113,14 +112,14 @@ public class SleeperPipelineTests(TestDataBaseFixture fixture) : IClassFixture<T
             Positions = [IncludedPosition.QB],
             LastUpdated = DateTime.UtcNow
         };
-        updatedPlayer.AddExternalId(new ExternalIdPlayerLookup
+        updatedPlayer.AddExternalId(new ExternalIdModel
         {
             DataSource = DataSource.Sleeper,
             SourceId = "1",
             Player = updatedPlayer
         });
 
-        await loader.LoadData(new List<Player> { updatedPlayer });
+        await loader.LoadData(new List<PlayerModel> { updatedPlayer });
         context.ChangeTracker.Clear();
         var updated = await context.Players
             .Include(p => p.ExternalIds)

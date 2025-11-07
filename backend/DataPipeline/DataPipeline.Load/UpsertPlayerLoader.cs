@@ -4,14 +4,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using DataPipeline.Interfaces;
 
-namespace DataPipeline.Loaders;
+namespace DataPipeline.DataPipeline.Loaders;
 
-public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader> logger) : IDataLoader<Player>
+public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader> logger) : IDataLoader<PlayerModel>
 {
     private readonly AppDbContext _context = context;
 
 
-    public async Task<int> LoadData(List<Player> players)
+    public async Task<int> LoadData(List<PlayerModel> players)
     {
         logger.LogInformation("PlayerUpsertLoader");
 

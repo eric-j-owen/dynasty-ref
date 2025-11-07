@@ -5,14 +5,14 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 
-namespace DataPipeline.DataProviders;
+namespace DataPipeline.DataPipeline.DataProviders;
 
-public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logger) : IDataProvider<KtcScrapedPlayer>
+public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logger) : IDataProvider<KtcScrapedPlayerDto>
 {
     private readonly HttpClient _client = client;
     private readonly string _endpoint = "/dynasty-rankings?page=0";
 
-    public async Task<List<KtcScrapedPlayer>> ExtractDataAsync()
+    public async Task<List<KtcScrapedPlayerDto>> ExtractDataAsync()
     {
         try
         {
@@ -32,7 +32,7 @@ public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logge
         }
     }
 
-    public static List<KtcScrapedPlayer> ParsePlayersFromDocument(HtmlDocument html)
+    public static List<KtcScrapedPlayerDto> ParsePlayersFromDocument(HtmlDocument html)
     {
         try
         {
@@ -63,7 +63,7 @@ public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logge
             var endOfJsonSplit = playersArraySplit[1].Split(";");
             var json = endOfJsonSplit[0];
 
-            var ktcPlayers = JsonSerializer.Deserialize<List<KtcScrapedPlayer>>(json);
+            var ktcPlayers = JsonSerializer.Deserialize<List<KtcScrapedPlayerDto>>(json);
 
             if (ktcPlayers == null || ktcPlayers.Count == 0)
             {
