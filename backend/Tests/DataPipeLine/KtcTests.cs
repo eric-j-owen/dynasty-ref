@@ -1,4 +1,4 @@
-using DataPipeline.DataProviders;
+using DataPipeline.DataPipeline.DataProviders;
 using DataPipeline.DTOs;
 using HtmlAgilityPack;
 
