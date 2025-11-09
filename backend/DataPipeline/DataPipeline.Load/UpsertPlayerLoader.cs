@@ -3,6 +3,7 @@ using Db.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using DataPipeline.Interfaces;
+using Shared.Consts;
 
 namespace DataPipeline.DataPipeline.Loaders;
 
@@ -11,36 +12,55 @@ public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader
     private readonly AppDbContext _context = context;
 
 
-    public async Task<int> LoadData(List<PlayerModel> players)
+    public async Task<int> LoadData(List<PlayerModel> transformedSleeperPlayers)
     {
-        logger.LogInformation("PlayerUpsertLoader");
-
         logger.LogInformation("finding existing players");
-        var sleeperIds = (from player in players
+
+        // gets sleeperids from transformed data coming from sleeper api 
+        var sleeperIds = (from player in transformedSleeperPlayers
                           select player.ExternalIds.First().SourceId)
                          .ToHashSet();
 
+        // lookups players in database that have that id
         var existingSleeperIdLookups = await _context.ExternalIdPlayerLookups
-            .Where(lookup => lookup.DataSource == Shared.Consts.DataSource.Sleeper && sleeperIds.Contains(lookup.SourceId))
+            .Where(lookup => lookup.DataSource == DataSource.Sleeper && sleeperIds.Contains(lookup.SourceId))
             .Include(lookup => lookup.Player)
             .ToDictionaryAsync(lookup => lookup.SourceId);
 
         logger.LogInformation("beginning player upsert");
+
         var added = 0;
         var updated = 0;
-        foreach (var player in players)
-        {
-            var sleeperId = player.ExternalIds.First(id => id.DataSource == Shared.Consts.DataSource.Sleeper).SourceId;
-            if (sleeperId != null && existingSleeperIdLookups.TryGetValue(sleeperId, out var existingPlayerLookup))
-            {
-                existingPlayerLookup.Player.FirstName = player.FirstName;
-                existingPlayerLookup.Player.LastName = player.LastName;
-                existingPlayerLookup.Player.NormalizedName = player.NormalizedName;
-                existingPlayerLookup.Player.Positions = player.Positions;
-                existingPlayerLookup.Player.Team = player.Team;
-                existingPlayerLookup.Player.LastUpdated = DateTime.UtcNow;
 
-                updated++;
+        foreach (var player in transformedSleeperPlayers)
+        {
+            //current players sleeper id
+            var sleeperId = player.ExternalIds.First(id => id.DataSource == DataSource.Sleeper).SourceId;
+
+            //if existing by sleeperid, output entity
+            if (existingSleeperIdLookups.TryGetValue(sleeperId, out var existingPlayerLookup))
+            {
+                var existingPlayer = existingPlayerLookup.Player;
+
+                //check for any changes before updating
+                bool isChanged =
+                    existingPlayer.FirstName != player.FirstName ||
+                    existingPlayer.LastName != player.LastName ||
+                    existingPlayer.NormalizedName != player.NormalizedName ||
+                    !existingPlayer.Positions.SequenceEqual(player.Positions) ||
+                    existingPlayer.Team != player.Team;
+
+                if (isChanged)
+                {
+                    existingPlayer.FirstName = player.FirstName;
+                    existingPlayer.LastName = player.LastName;
+                    existingPlayer.NormalizedName = player.NormalizedName;
+                    existingPlayer.Positions = player.Positions;
+                    existingPlayer.Team = player.Team;
+                    existingPlayer.LastUpdated = DateTime.UtcNow;
+
+                    updated++;
+                }
             }
             else
             {
