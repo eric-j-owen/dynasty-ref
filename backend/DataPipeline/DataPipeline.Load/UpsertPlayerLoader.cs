@@ -10,6 +10,8 @@ namespace DataPipeline.DataPipeline.Loaders;
 public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader> logger) : IDataLoader<PlayerModel>
 {
     private readonly AppDbContext _context = context;
+    public int UpdateCount { get; set; } = 0;
+    public int AddCount { get; set; } = 0;
 
 
     public async Task<int> LoadData(List<PlayerModel> transformedSleeperPlayers)
@@ -29,8 +31,6 @@ public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader
 
         logger.LogInformation("beginning player upsert");
 
-        var added = 0;
-        var updated = 0;
 
         foreach (var player in transformedSleeperPlayers)
         {
@@ -44,11 +44,11 @@ public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader
 
                 //check for any changes before updating
                 bool isChanged =
-                    existingPlayer.FirstName != player.FirstName ||
-                    existingPlayer.LastName != player.LastName ||
-                    existingPlayer.NormalizedName != player.NormalizedName ||
-                    !existingPlayer.Positions.SequenceEqual(player.Positions) ||
-                    existingPlayer.Team != player.Team;
+                    !existingPlayer.FirstName.Equals(player.FirstName) ||
+                    !existingPlayer.LastName.Equals(player.LastName) ||
+                    !existingPlayer.NormalizedName.Equals(player.NormalizedName) ||
+                    !existingPlayer.Team.Equals(player.Team) ||
+                    !existingPlayer.Positions.SequenceEqual(player.Positions);
 
                 if (isChanged)
                 {
@@ -59,18 +59,18 @@ public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader
                     existingPlayer.Team = player.Team;
                     existingPlayer.LastUpdated = DateTime.UtcNow;
 
-                    updated++;
+                    UpdateCount++;
                 }
             }
             else
             {
                 _context.Add(player);
-                added++;
+                AddCount++;
             }
         }
 
-        logger.LogInformation("updated {x} players", updated);
-        logger.LogInformation("added {x} new players", added);
+        logger.LogInformation("updated {x} players", UpdateCount);
+        logger.LogInformation("added {x} new players", AddCount);
 
         return await _context.SaveChangesAsync();
     }
