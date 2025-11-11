@@ -59,16 +59,18 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
     public TestDataBaseFixture Fixture { get; } = fixture;
 
     [Fact]
-    public async Task LoadData_NewPlayer_AddsToDb()
+    public async Task UpsertPlayer_NewPlayer_AddsToDb()
     {
         using var context = Fixture.CreateContext();
         context.Database.BeginTransaction();
 
+        var initialCount = context.Players.Count();
+
         var player = new PlayerModel
         {
-            FirstName = "test",
+            FirstName = "new",
             LastName = "player",
-            NormalizedName = "testplayer",
+            NormalizedName = "newplayer",
             Team = TeamAbbr.CLE,
             Positions = [IncludedPosition.QB],
             LastUpdated = DateTime.UtcNow
@@ -78,38 +80,37 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
             new ExternalIdModel
             {
                 DataSource = DataSource.Sleeper,
-                SourceId = "1",
+                SourceId = "2",
                 Player = player
             }
         );
 
         var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
-        await loader.LoadData(new List<PlayerModel> { player });
+        await loader.LoadData([player]);
 
         context.ChangeTracker.Clear();
 
-        var saved = await context.Players.SingleAsync(p => p.LastName == "player", TestContext.Current.CancellationToken);
+        Assert.Equal(initialCount + 1, context.Players.Count());
+        Assert.Equal(1, loader.AddCount);
+        Assert.Equal(0, loader.UpdateCount);
 
-        Assert.Equal("test", saved.FirstName);
     }
 
     [Fact]
-    public async Task LoadData_ExistingPlayer_updates()
+    public async Task UpsertPlayer_ExistingPlayer_updates()
     {
         using var context = Fixture.CreateContext();
         context.Database.BeginTransaction();
         var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
 
-        Assert.Single(context.Players); // just checking if seeded data is present before upsert
-
         var updatedPlayer = new PlayerModel
         {
 
-            FirstName = "new",
+            FirstName = "updated",
             LastName = "player",
-            NormalizedName = "newplayer",
+            NormalizedName = "updatedplayer",
             Team = TeamAbbr.CLE,
-            Positions = [IncludedPosition.QB],
+            Positions = [IncludedPosition.QB, IncludedPosition.TE],
             LastUpdated = DateTime.UtcNow
         };
         updatedPlayer.AddExternalId(new ExternalIdModel
@@ -119,15 +120,49 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
             Player = updatedPlayer
         });
 
-        await loader.LoadData(new List<PlayerModel> { updatedPlayer });
+        await loader.LoadData([updatedPlayer]);
         context.ChangeTracker.Clear();
         var updated = await context.Players
             .Include(p => p.ExternalIds)
             .SingleAsync(p => p.LastName == "player", TestContext.Current.CancellationToken);
 
-        Assert.Equal("new", updated.FirstName);
+        Assert.Equal(updatedPlayer.FirstName, updated.FirstName);
+        Assert.Equal(updatedPlayer.Positions, updated.Positions);
         Assert.Single(context.Players);
         Assert.Single(context.Players.First().ExternalIds);
+        Assert.Equal(1, loader.UpdateCount);
+        Assert.Equal(0, loader.AddCount);
+
+    }
+
+    [Fact]
+    public async Task UpsertPlayer_ExistingPlayer_noUpdatesIsProperlyHandled()
+    {
+        using var context = Fixture.CreateContext();
+        context.Database.BeginTransaction();
+        var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
+
+        var p = context.Players.Include(p => p.ExternalIds).First();
+        var samePlayer = new PlayerModel
+        {
+            FirstName = p.FirstName,
+            LastName = p.LastName,
+            NormalizedName = p.NormalizedName,
+            Team = p.Team,
+            Positions = p.Positions,
+            LastUpdated = p.LastUpdated
+        };
+        samePlayer.AddExternalId(new ExternalIdModel
+        {
+            DataSource = p.ExternalIds.First().DataSource,
+            SourceId = p.ExternalIds.First().SourceId,
+            Player = samePlayer
+        });
+
+        await loader.LoadData([samePlayer]);
+
+        Assert.Equal(0, loader.UpdateCount);
+        Assert.Equal(0, loader.AddCount);
     }
 
 }
