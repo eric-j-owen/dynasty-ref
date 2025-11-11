@@ -11,7 +11,7 @@ public class TestDataBaseFixture
 {
     private const string ConnectionString = @"Host=localhost;Database=test_dynasty_db;Username=username;Password=password";
 
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
     private static bool _databaseInitialized;
 
     public TestDataBaseFixture()
@@ -46,7 +46,7 @@ public class TestDataBaseFixture
         }
     }
 
-    public AppDbContext CreateContext()
+    public static AppDbContext CreateContext()
         => new(
             new DbContextOptionsBuilder<AppDbContext>()
                 .UseNpgsql(ConnectionString)
@@ -61,7 +61,7 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
     [Fact]
     public async Task UpsertPlayer_NewPlayer_AddsToDb()
     {
-        using var context = Fixture.CreateContext();
+        using var context = TestDataBaseFixture.CreateContext();
         context.Database.BeginTransaction();
 
         var initialCount = context.Players.Count();
@@ -99,7 +99,7 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
     [Fact]
     public async Task UpsertPlayer_ExistingPlayer_updates()
     {
-        using var context = Fixture.CreateContext();
+        using var context = TestDataBaseFixture.CreateContext();
         context.Database.BeginTransaction();
         var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
 
@@ -138,7 +138,7 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
     [Fact]
     public async Task UpsertPlayer_ExistingPlayer_noUpdatesIsProperlyHandled()
     {
-        using var context = Fixture.CreateContext();
+        using var context = TestDataBaseFixture.CreateContext();
         context.Database.BeginTransaction();
         var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
 
