@@ -5,14 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Db;
 using Db.Models;
 using Shared.Consts;
-using DataPipeline.DataPipeline.Loaders;
-using DataPipeline.DataPipeline.DataProviders;
-using DataPipeline.Pipelines;
-using DataPipeline.Interfaces;
-using DataPipeline.DataPipeline.Transform;
 using DataPipeline.DTOs;
-using DataPipeline.Datapipeline.Transform;
+using DataPipeline.Interfaces;
+using DataPipeline.DataPipeline.Extract;
+using DataPipeline.DataPipeline.Transform;
 using DataPipeline.DataPipeline.Load;
+using DataPipeline.Pipelines;
 
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);

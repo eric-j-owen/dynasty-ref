@@ -3,7 +3,7 @@ using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace DataPipeline.DataPipeline.DataProviders;
+namespace DataPipeline.DataPipeline.Extract;
 
 public class GetSleeperPlayers(HttpClient client, ILogger<GetSleeperPlayers> logger) : IDataProvider<SleeperPlayerDto>
 {

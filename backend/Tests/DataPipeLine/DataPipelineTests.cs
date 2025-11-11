@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Db;
 using Db.Models;
 using Shared.Consts;
-using DataPipeline.DataPipeline.Loaders;
+using DataPipeline.DataPipeline.Load;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.DataPipeline;

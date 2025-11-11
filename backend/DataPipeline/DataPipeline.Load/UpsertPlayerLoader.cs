@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using DataPipeline.Interfaces;
 using Shared.Consts;
 
-namespace DataPipeline.DataPipeline.Loaders;
+namespace DataPipeline.DataPipeline.Load;
 
 public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader> logger) : IDataLoader<PlayerModel>
 {

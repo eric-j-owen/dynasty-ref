@@ -3,7 +3,7 @@ using CsvHelper;
 using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
 
-namespace DataPipeline.DataPipeline.DataProviders;
+namespace DataPipeline.DataPipeline.Extract;
 
 public class GetDynastyProcessIds(HttpClient client) : IDataProvider<DynastyProcessIdsDto>
 {

@@ -2,7 +2,7 @@ using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
 using Db.Models;
 
-namespace DataPipeline.Datapipeline.Transform;
+namespace DataPipeline.DataPipeline.Transform;
 
 public class ExternalIdTransform : IDataTransformer<DynastyProcessIdsDto>
 {
