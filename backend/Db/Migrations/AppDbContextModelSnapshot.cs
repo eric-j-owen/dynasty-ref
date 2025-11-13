@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Shared.Consts;
 
 #nullable disable
 
@@ -20,15 +21,15 @@ namespace Db.Migrations
                 .HasAnnotation("ProductVersion", "9.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "data_source", new[] { "keep_trade_cut", "fantasy_calc", "sleeper", "dynasty_process", "reddit" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "included_position", new[] { "qb", "wr", "rb", "te" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "team_abbr", new[] { "buf", "mia", "ne", "nyj", "dal", "nyg", "phi", "was", "bal", "cin", "cle", "pit", "chi", "det", "gb", "min", "hou", "ind", "jax", "ten", "atl", "car", "no", "tb", "den", "kc", "lv", "lac", "ari", "lar", "sf", "sea", "null_team" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "data_source", new[] { "dynasty_process", "fantasy_calc", "keep_trade_cut", "mfl", "sleeper" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "included_pos", new[] { "qb", "rb", "te", "wr" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "team", new[] { "ari", "atl", "bal", "buf", "car", "chi", "cin", "cle", "dal", "den", "det", "gb", "hou", "ind", "jax", "kc", "lac", "lar", "lv", "mia", "min", "ne", "no", "null_team", "nyg", "nyj", "phi", "pit", "sea", "sf", "tb", "ten", "was" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Db.Models.ExternalIdPlayerLookup", b =>
+            modelBuilder.Entity("Db.Models.ExternalIdModel", b =>
                 {
-                    b.Property<int>("DataSource")
-                        .HasColumnType("integer")
+                    b.Property<DataSource>("DataSource")
+                        .HasColumnType("data_source")
                         .HasColumnName("data_source");
 
                     b.Property<string>("SourceId")
@@ -46,7 +47,7 @@ namespace Db.Migrations
                     b.ToTable("external_id_player_lookup");
                 });
 
-            modelBuilder.Entity("Db.Models.Player", b =>
+            modelBuilder.Entity("Db.Models.PlayerModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,13 +75,13 @@ namespace Db.Migrations
                         .HasColumnType("text")
                         .HasColumnName("normalized_name");
 
-                    b.PrimitiveCollection<int[]>("Positions")
+                    b.PrimitiveCollection<IncludedPosition[]>("Positions")
                         .IsRequired()
-                        .HasColumnType("integer[]")
+                        .HasColumnType("included_pos[]")
                         .HasColumnName("positions");
 
-                    b.Property<int>("Team")
-                        .HasColumnType("integer")
+                    b.Property<TeamAbbr>("Team")
+                        .HasColumnType("team")
                         .HasColumnName("team");
 
                     b.HasKey("Id");
@@ -88,7 +89,7 @@ namespace Db.Migrations
                     b.ToTable("players");
                 });
 
-            modelBuilder.Entity("Db.Models.PlayerValue", b =>
+            modelBuilder.Entity("Db.Models.PlayerValueModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -101,8 +102,8 @@ namespace Db.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<int>("DataSource")
-                        .HasColumnType("integer")
+                    b.Property<DataSource>("DataSource")
+                        .HasColumnType("data_source")
                         .HasColumnName("data_source");
 
                     b.Property<bool>("IsSuperFlex")
@@ -124,9 +125,9 @@ namespace Db.Migrations
                     b.ToTable("player_values");
                 });
 
-            modelBuilder.Entity("Db.Models.ExternalIdPlayerLookup", b =>
+            modelBuilder.Entity("Db.Models.ExternalIdModel", b =>
                 {
-                    b.HasOne("Db.Models.Player", "Player")
+                    b.HasOne("Db.Models.PlayerModel", "Player")
                         .WithMany("ExternalIds")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -135,9 +136,9 @@ namespace Db.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("Db.Models.PlayerValue", b =>
+            modelBuilder.Entity("Db.Models.PlayerValueModel", b =>
                 {
-                    b.HasOne("Db.Models.Player", "Player")
+                    b.HasOne("Db.Models.PlayerModel", "Player")
                         .WithMany()
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -146,7 +147,7 @@ namespace Db.Migrations
                     b.Navigation("Player");
                 });
 
-            modelBuilder.Entity("Db.Models.Player", b =>
+            modelBuilder.Entity("Db.Models.PlayerModel", b =>
                 {
                     b.Navigation("ExternalIds");
                 });
