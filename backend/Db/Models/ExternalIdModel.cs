@@ -19,5 +19,5 @@ public class ExternalIdModel
     public int PlayerId { get; set; }
 
     [ForeignKey(nameof(PlayerId))]
-    public required PlayerModel Player { get; set; }
+    public PlayerModel? Player { get; set; }
 }
