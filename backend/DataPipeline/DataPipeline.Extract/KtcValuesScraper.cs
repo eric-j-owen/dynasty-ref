@@ -2,12 +2,11 @@ using HtmlAgilityPack;
 using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 
 
 namespace DataPipeline.DataPipeline.DataProviders;
 
-public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logger) : IDataProvider<KtcScrapedPlayerDto>
+public class KtcValuesScraper(HttpClient client) : IDataProvider<KtcScrapedPlayerDto>
 {
     private readonly HttpClient _client = client;
     private readonly string _endpoint = "/dynasty-rankings?page=0";
@@ -21,13 +20,12 @@ public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logge
             var html = new HtmlDocument();
             html.LoadHtml(res);
 
-            logger.LogInformation("success: fetched html");
             return ParsePlayersFromDocument(html);
 
         }
         catch (Exception e)
         {
-            logger.LogError("http req failed: {e}", e);
+            Console.WriteLine($"error during ktc scrape: {e}");
             throw;
         }
     }
@@ -38,16 +36,13 @@ public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logge
         {
             const string playersArrayDeclarationStr = "var playersArray = ";
 
-            var scriptNodes = html.DocumentNode.SelectNodes("//script");
+            var scriptNodes = html.DocumentNode.SelectNodes("//script") ?? throw new Exception("scraper: did not find <script> tags");
 
-            if (scriptNodes == null)
-            {
-                throw new Exception("scraper: did not find <script> tags");
-            }
             string strNode = "";
             foreach (var node in scriptNodes)
             {
                 strNode = node.InnerText;
+
                 if (strNode.Contains(playersArrayDeclarationStr))
                 {
                     break;
@@ -75,7 +70,7 @@ public class KtcValuesScraper(HttpClient client, ILogger<KtcValuesScraper> logge
         }
         catch (Exception e)
         {
-            Console.WriteLine("scraper failed: {e}", e);
+            Console.WriteLine($"scraper failed: {e}");
             throw;
         }
     }

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DataPipeline.DataPipeline.Transform;
 
-public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) : IDataTransformer<SleeperPlayerDto>
+public class SleeperPlayerTransformer : IDataTransformer<SleeperPlayerDto>
 {
     private static readonly HashSet<string> _positions = [.. Enum.GetNames<IncludedPosition>()];
 
@@ -17,8 +17,6 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
 
         List<PlayerModel> players = [];
         List<SleeperPlayerDto> incompleteData = [];
-
-        logger.LogInformation("beginning data transform on {x} records", data.Count);
 
         var validPlayers = (from record in data
                             where
@@ -69,9 +67,6 @@ public class SleeperPlayerTransformer(ILogger<SleeperPlayerTransformer> logger) 
 
         }
 
-        logger.LogInformation("transformed {x} players", players.Count);
-        logger.LogWarning("found {x} incomplete player data records {players}", incompleteData.Count, JsonSerializer.Serialize(incompleteData));
-
-        return new TransformResult(players);
+        return new TransformResult(players, null, null, incompleteData);
     }
 }

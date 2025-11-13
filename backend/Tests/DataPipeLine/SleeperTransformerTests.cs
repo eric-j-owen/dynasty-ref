@@ -1,6 +1,5 @@
 using DataPipeline.DataPipeline.Transform;
 using DataPipeline.DTOs;
-using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Consts;
 
 namespace Tests.DataPipeline;
@@ -10,7 +9,7 @@ public class SleeperTransformerTests
     [Fact]
     public void Transform_Returns_PlayerObjectWithExternalId()
     {
-        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
+        var transformer = new SleeperPlayerTransformer();
         var data = new List<SleeperPlayerDto>
         {
             new()
@@ -45,7 +44,7 @@ public class SleeperTransformerTests
     [Fact]
     public void Transform_ParsesAndFilters_Positions()
     {
-        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
+        var transformer = new SleeperPlayerTransformer();
         var data = new List<SleeperPlayerDto>
         {
             new()
@@ -91,7 +90,7 @@ public class SleeperTransformerTests
     [Fact]
     public void Transform_Filters_NonPlayerRecords()
     {
-        var transformer = new SleeperPlayerTransformer(NullLogger<SleeperPlayerTransformer>.Instance);
+        var transformer = new SleeperPlayerTransformer();
         var data = new List<SleeperPlayerDto>
         {
             new() {Positions = null},

@@ -2,5 +2,7 @@ namespace DataPipeline.Interfaces;
 
 public interface IDataLoader<T>
 {
-    Task<int> LoadData(List<T> data);
+    Task<LoadResult> LoadData(List<T> data);
 }
+
+public record LoadResult(int? AddCount = null, int? UpdateCount = null);

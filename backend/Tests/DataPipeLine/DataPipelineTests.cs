@@ -3,7 +3,6 @@ using Db;
 using Db.Models;
 using Shared.Consts;
 using DataPipeline.DataPipeline.Load;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Tests.DataPipeline;
 
@@ -85,14 +84,14 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
             }
         );
 
-        var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
-        await loader.LoadData([player]);
+        var loader = new PlayerUpsertLoader(context);
+        var res = await loader.LoadData([player]);
 
         context.ChangeTracker.Clear();
 
         Assert.Equal(initialCount + 1, context.Players.Count());
-        Assert.Equal(1, loader.AddCount);
-        Assert.Equal(0, loader.UpdateCount);
+        Assert.Equal(1, res.AddCount);
+        Assert.Equal(0, res.UpdateCount);
 
     }
 
@@ -101,7 +100,7 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
     {
         using var context = TestDataBaseFixture.CreateContext();
         context.Database.BeginTransaction();
-        var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
+        var loader = new PlayerUpsertLoader(context);
 
         var updatedPlayer = new PlayerModel
         {
@@ -120,7 +119,7 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
             Player = updatedPlayer
         });
 
-        await loader.LoadData([updatedPlayer]);
+        var res = await loader.LoadData([updatedPlayer]);
         context.ChangeTracker.Clear();
         var updated = await context.Players
             .Include(p => p.ExternalIds)
@@ -130,8 +129,8 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
         Assert.Equal(updatedPlayer.Positions, updated.Positions);
         Assert.Single(context.Players);
         Assert.Single(context.Players.First().ExternalIds);
-        Assert.Equal(1, loader.UpdateCount);
-        Assert.Equal(0, loader.AddCount);
+        Assert.Equal(1, res.UpdateCount);
+        Assert.Equal(0, res.AddCount);
 
     }
 
@@ -140,7 +139,7 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
     {
         using var context = TestDataBaseFixture.CreateContext();
         context.Database.BeginTransaction();
-        var loader = new PlayerUpsertLoader(context, NullLogger<PlayerUpsertLoader>.Instance);
+        var loader = new PlayerUpsertLoader(context);
 
         var p = context.Players.Include(p => p.ExternalIds).First();
         var samePlayer = new PlayerModel
@@ -159,10 +158,10 @@ public class DataPipeline(TestDataBaseFixture fixture) : IClassFixture<TestDataB
             Player = samePlayer
         });
 
-        await loader.LoadData([samePlayer]);
+        var res = await loader.LoadData([samePlayer]);
 
-        Assert.Equal(0, loader.UpdateCount);
-        Assert.Equal(0, loader.AddCount);
+        Assert.Equal(0, res.UpdateCount);
+        Assert.Equal(0, res.AddCount);
     }
 
 }

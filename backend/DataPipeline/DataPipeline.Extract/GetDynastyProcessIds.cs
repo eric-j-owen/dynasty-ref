@@ -13,8 +13,6 @@ public class GetDynastyProcessIds(HttpClient client) : IDataProvider<DynastyProc
     {
         try
         {
-
-
             var stream = await _client.GetStreamAsync(_endpoint);
             using (var reader = new StreamReader(stream))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))

@@ -7,16 +7,13 @@ using Shared.Consts;
 
 namespace DataPipeline.DataPipeline.Load;
 
-public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader> logger) : IDataLoader<PlayerModel>
+public class PlayerUpsertLoader(AppDbContext context) : IDataLoader<PlayerModel>
 {
     private readonly AppDbContext _context = context;
-    public int UpdateCount { get; set; } = 0;
-    public int AddCount { get; set; } = 0;
 
-
-    public async Task<int> LoadData(List<PlayerModel> transformedSleeperPlayers)
+    public async Task<LoadResult> LoadData(List<PlayerModel> transformedSleeperPlayers)
     {
-        logger.LogInformation("finding existing players");
+        int addCount = 0; int updateCount = 0;
 
         // gets sleeperids from transformed data coming from sleeper api 
         var sleeperIds = (from player in transformedSleeperPlayers
@@ -28,8 +25,6 @@ public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader
             .Where(lookup => lookup.DataSource == DataSource.Sleeper && sleeperIds.Contains(lookup.SourceId))
             .Include(lookup => lookup.Player)
             .ToDictionaryAsync(lookup => lookup.SourceId);
-
-        logger.LogInformation("beginning player upsert");
 
 
         foreach (var player in transformedSleeperPlayers)
@@ -59,20 +54,18 @@ public class PlayerUpsertLoader(AppDbContext context, ILogger<PlayerUpsertLoader
                     existingPlayer.Team = player.Team;
                     existingPlayer.LastUpdated = DateTime.UtcNow;
 
-                    UpdateCount++;
+                    updateCount++;
                 }
             }
             else
             {
                 _context.Add(player);
-                AddCount++;
+                addCount++;
             }
         }
 
-        logger.LogInformation("updated {x} players", UpdateCount);
-        logger.LogInformation("added {x} new players", AddCount);
-
-        return await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
+        return new LoadResult(addCount, updateCount);
     }
 }
 

@@ -10,5 +10,6 @@ public interface IDataTransformer<T>
 public record TransformResult(
     List<PlayerModel>? PlayerData = null,
     List<ExternalIdWithLookupDto>? ExternalIdPlayerData = null,
-    List<PlayerValueModel>? PlayerValueData = null
+    List<PlayerValueModel>? PlayerValueData = null,
+    List<SleeperPlayerDto>? IncompletePlayerData = null
 );
