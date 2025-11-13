@@ -24,14 +24,15 @@ public class RunPipeline<T>(
             var dataExtract = await provider.ExtractDataAsync();
             logger.LogInformation("extract count: {x}", dataExtract.Count);
 
-            logger.LogInformation("beginning data extract");
+            logger.LogInformation("beginning data transform");
             var transformedData = transformer.Transform(dataExtract);
 
-
-            logger.LogInformation("beginning data load");
             if (transformedData?.PlayerData?.Count > 0)
             {
-                logger.LogInformation("transformed {x} records", transformedData.PlayerData);
+
+                logger.LogInformation("transformed {x} records", transformedData.PlayerData.Count);
+
+                logger.LogInformation("beginning data load");
                 logger.LogInformation("found {x} records of incomplete data", transformedData.IncompletePlayerData!.Count);
                 logger.LogDebug("data {x}", JsonSerializer.Serialize(transformedData.IncompletePlayerData));
 
@@ -44,7 +45,10 @@ public class RunPipeline<T>(
             if (transformedData?.ExternalIdPlayerData?.Count > 0)
             {
                 logger.LogInformation("transformed {x} records", transformedData.ExternalIdPlayerData.Count);
-                await idloader.LoadData(transformedData.ExternalIdPlayerData);
+
+                logger.LogInformation("beginning data load");
+                var res = await idloader.LoadData(transformedData.ExternalIdPlayerData);
+                logger.LogInformation("added {x} new ids", res.AddCount);
             }
 
             logger.LogInformation("{r} success", runner);
