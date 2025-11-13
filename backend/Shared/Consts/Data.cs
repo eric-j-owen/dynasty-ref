@@ -14,18 +14,11 @@ public static class ApiBaseUrl
     public const string Github = "https://api.github.com";
 }
 
-
-public enum IncompleteDataReason
-{
-    MissingId,
-    MissingName
-}
-
 public enum DataSource
 {
     KeepTradeCut,
     FantasyCalc,
     Sleeper,
     DynastyProcess,
-    Reddit
+    Mfl
 }
