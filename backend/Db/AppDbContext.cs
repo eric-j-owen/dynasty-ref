@@ -14,12 +14,5 @@ namespace Db
         public DbSet<PlayerModel> Players { get; set; }
         public DbSet<PlayerValueModel> PlayerValues { get; set; }
         public DbSet<ExternalIdModel> ExternalIdPlayerLookups { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasPostgresEnum<DataSource>();
-            modelBuilder.HasPostgresEnum<TeamAbbr>();
-            modelBuilder.HasPostgresEnum<IncludedPosition>();
-        }
     }
 }

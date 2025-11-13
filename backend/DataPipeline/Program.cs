@@ -17,11 +17,18 @@ HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 
 builder.Configuration
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddDbContextPool<AppDbContext>(opt =>
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    opt.UseNpgsql
+    (
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        o => o
+            .MapEnum<DataSource>("data_source")
+            .MapEnum<TeamAbbr>("team")
+            .MapEnum<IncludedPosition>("included_pos")
+    ));
 
 // data providers
 builder.Services.AddHttpClient<IDataProvider<SleeperPlayerDto>, GetSleeperPlayers>(client =>
@@ -52,7 +59,7 @@ builder.Services.AddTransient<IDataTransformer<DynastyProcessIdsDto>, ExternalId
 
 //loaders
 builder.Services.AddTransient<IDataLoader<PlayerModel>, PlayerUpsertLoader>();
-builder.Services.AddTransient<IDataLoader<ExternalIdModel>, ExternalIdsLoader>();
+builder.Services.AddTransient<IDataLoader<ExternalIdWithLookupDto>, ExternalIdsLoader>();
 
 //pipelines
 builder.Services.AddTransient<RunPipeline<SleeperPlayerDto>>();
