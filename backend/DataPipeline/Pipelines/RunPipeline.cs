@@ -10,7 +10,7 @@ public class RunPipeline<T>(
     IDataProvider<T> provider,
     IDataTransformer<T> transformer,
     IDataLoader<PlayerModel> playerLoader,
-    IDataLoader<ExternalIdModel> idloader,
+    IDataLoader<ExternalIdWithLookupDto> idloader,
 
     ILogger<T> logger) : IPipeline
 {

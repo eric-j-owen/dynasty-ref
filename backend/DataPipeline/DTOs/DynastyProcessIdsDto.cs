@@ -6,8 +6,11 @@ namespace DataPipeline.DTOs;
 public record DynastyProcessIdsDto
 {
     [Name("sleeper_id")]
-    public int SleeperId { get; set; }
+    public string? SleeperId { get; set; }
 
     [Name("ktc_id")]
-    public int KtcId { get; set; }
+    public string? KtcId { get; set; }
+
+    [Name("mfl_id")]
+    public string? MflId { get; set; }
 }

@@ -1,3 +1,4 @@
+using DataPipeline.DTOs;
 using Db.Models;
 namespace DataPipeline.Interfaces;
 
@@ -8,6 +9,6 @@ public interface IDataTransformer<T>
 
 public record TransformResult(
     List<PlayerModel>? PlayerData = null,
-    List<ExternalIdModel>? ExternalIdPlayerData = null,
+    List<ExternalIdWithLookupDto>? ExternalIdPlayerData = null,
     List<PlayerValueModel>? PlayerValueData = null
 );
