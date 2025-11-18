@@ -4,7 +4,7 @@ using DataPipeline.Interfaces;
 
 namespace DataPipeline.DataPipeline.Extract;
 
-public class GetSleeperPlayers(HttpClient client) : IDataProvider<SleeperPlayerDto>
+public class SleeperPlayersExtract(HttpClient client) : IDataProvider<SleeperPlayerDto>
 {
     private readonly HttpClient _client = client;
 

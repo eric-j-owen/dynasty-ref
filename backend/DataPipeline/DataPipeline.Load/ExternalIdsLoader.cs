@@ -21,10 +21,10 @@ public class ExternalIdsLoader(AppDbContext context) : IDataLoader<ExternalIdWit
         //matches sleeper ids to existing players
         var existingPlayers = await _context.ExternalIdPlayerLookups
             .Where(lookup => lookup.DataSource == DataSource.Sleeper && sleeperIds.Contains(lookup.SourceId))
-            .ToDictionaryAsync(lookup => lookup.SourceId, lookup => lookup.PlayerId);
-        var playerIds = existingPlayers.Values.ToHashSet();
+            .ToDictionaryAsync(lookup => lookup.SourceId, lookup => lookup.PlayerId); //{sleeperid, playerid}
 
         //retrieves existing players current external ids to check duplicates
+        var playerIds = existingPlayers.Values.ToHashSet();
         var existingExternalIds = await _context.ExternalIdPlayerLookups
             .Where(lookup => playerIds.Contains(lookup.PlayerId))
             .Select(lookup => new { lookup.PlayerId, lookup.DataSource, lookup.SourceId })
@@ -46,15 +46,14 @@ public class ExternalIdsLoader(AppDbContext context) : IDataLoader<ExternalIdWit
                 {
                     DataSource = record.DataSource,
                     SourceId = record.SourceId,
-                    PlayerId = internalPlayerId,
-                    Player = null!
+                    PlayerId = internalPlayerId
                 });
 
                 addCount++;
             }
         }
 
-        var res = await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         return new LoadResult(addCount);
     }
 }

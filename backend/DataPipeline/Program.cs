@@ -3,14 +3,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Db;
-using Db.Models;
 using Shared.Consts;
-using DataPipeline.DTOs;
 using DataPipeline.Interfaces;
 using DataPipeline.DataPipeline.Extract;
+using DataPipeline.Pipelines;
+using DataPipeline.DataPipeline.Extract.PlayerValueSources;
 using DataPipeline.DataPipeline.Transform;
 using DataPipeline.DataPipeline.Load;
-using DataPipeline.Pipelines;
 
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
@@ -31,14 +30,21 @@ builder.Services.AddDbContextPool<AppDbContext>(opt =>
             .MapEnum<IncludedPosition>("included_pos")
     ));
 
+/*
+==================
+    services 
+==================
+*/
+
 // data providers
-builder.Services.AddHttpClient<IDataProvider<SleeperPlayerDto>, GetSleeperPlayers>(client =>
+builder.Services.AddTransient<PlayerValuesExtract>();
+builder.Services.AddHttpClient<SleeperPlayersExtract>(client =>
 {
     client.BaseAddress = new Uri(ApiBaseUrl.Sleeper);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
-builder.Services.AddHttpClient<IDataProvider<DynastyProcessIdsDto>, GetDynastyProcessIds>(client =>
+builder.Services.AddHttpClient<ExternalIdsExtract>(client =>
 {
     client.BaseAddress = new Uri(ApiBaseUrl.Github);
     client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.raw+json");
@@ -48,23 +54,32 @@ builder.Services.AddHttpClient<IDataProvider<DynastyProcessIdsDto>, GetDynastyPr
         ("Authorization", builder.Configuration["ApiKeys:Github"]);
 });
 
-// builder.Services.AddHttpClient<KtcValuesScraper>(client =>
-// {
-//     client.BaseAddress = new Uri(ApiConsts.BaseUrl.Ktc);
-//     client.DefaultRequestHeaders.Add("User-Agent", ApiConsts.Config.UserAgent);
-// });
+builder.Services.AddHttpClient<KtcValuesExtract>(client =>
+{
+    client.BaseAddress = new Uri(ApiBaseUrl.Ktc);
+    client.DefaultRequestHeaders.Add("User-Agent", ApiConfig.UserAgent);
+});
 
-//transformers
-builder.Services.AddTransient<IDataTransformer<SleeperPlayerDto>, SleeperPlayerTransformer>();
-builder.Services.AddTransient<IDataTransformer<DynastyProcessIdsDto>, ExternalIdTransform>();
+builder.Services.AddHttpClient<FcValuesExtract>(client =>
+{
+    client.BaseAddress = new Uri(ApiBaseUrl.Fc);
+    client.DefaultRequestHeaders.Add("User-Agent", ApiConfig.UserAgent);
+});
+
+//transformers 
+builder.Services.AddTransient<SleeperPlayerTransformer>();
+builder.Services.AddTransient<ExternalIdTransform>();
 
 //loaders
-builder.Services.AddTransient<IDataLoader<PlayerModel>, PlayerUpsertLoader>();
-builder.Services.AddTransient<IDataLoader<ExternalIdWithLookupDto>, ExternalIdsLoader>();
+builder.Services.AddTransient<PlayerUpsertLoader>();
+builder.Services.AddTransient<ExternalIdsLoader>();
+builder.Services.AddTransient<PlayerValuesLoader>();
+
 
 //pipelines
-builder.Services.AddTransient<RunPipeline<SleeperPlayerDto>>();
-builder.Services.AddTransient<RunPipeline<DynastyProcessIdsDto>>();
+builder.Services.AddTransient<PlayerPipeline>();
+builder.Services.AddTransient<ExternalIdsPipeline>();
+builder.Services.AddTransient<PlayerValuesPipeline>();
 
 
 using IHost host = builder.Build();
@@ -77,14 +92,15 @@ try
     }
 
     var arg = args[0];
-    IPipeline service = arg switch
+    IPipeline pipeline = arg switch
     {
-        "players" => host.Services.GetRequiredService<RunPipeline<SleeperPlayerDto>>(),
-        "ids" => host.Services.GetRequiredService<RunPipeline<DynastyProcessIdsDto>>(),
+        "players" => host.Services.GetRequiredService<PlayerPipeline>(),
+        "ids" => host.Services.GetRequiredService<ExternalIdsPipeline>(),
+        "values" => host.Services.GetRequiredService<PlayerValuesPipeline>(),
         _ => throw new Exception("invalid argument"),
     };
 
-    await service.RunAsync();
+    await pipeline.RunAsync();
 }
 catch (Exception e)
 {

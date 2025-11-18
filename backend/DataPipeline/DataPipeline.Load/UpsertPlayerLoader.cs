@@ -1,6 +1,5 @@
 using Db;
 using Db.Models;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using DataPipeline.Interfaces;
 using Shared.Consts;
@@ -15,57 +14,67 @@ public class PlayerUpsertLoader(AppDbContext context) : IDataLoader<PlayerModel>
     {
         int addCount = 0; int updateCount = 0;
 
-        // gets sleeperids from transformed data coming from sleeper api 
         var sleeperIds = (from player in transformedSleeperPlayers
                           select player.ExternalIds.First().SourceId)
                          .ToHashSet();
 
-        // lookups players in database that have that id
         var existingSleeperIdLookups = await _context.ExternalIdPlayerLookups
             .Where(lookup => lookup.DataSource == DataSource.Sleeper && sleeperIds.Contains(lookup.SourceId))
             .Include(lookup => lookup.Player)
             .ToDictionaryAsync(lookup => lookup.SourceId);
 
 
-        foreach (var player in transformedSleeperPlayers)
+        foreach (var currPlayer in transformedSleeperPlayers)
         {
-            //current players sleeper id
-            var sleeperId = player.ExternalIds.First(id => id.DataSource == DataSource.Sleeper).SourceId;
+            var sleeperId = currPlayer.ExternalIds.First(id => id.DataSource == DataSource.Sleeper).SourceId;
 
             //if existing by sleeperid, output entity
             if (existingSleeperIdLookups.TryGetValue(sleeperId, out var existingPlayerLookup))
             {
-                var existingPlayer = existingPlayerLookup.Player;
+                if (existingPlayerLookup.Player == null)
+                {
+                    throw new Exception($"navigation property not set for {existingPlayerLookup.PlayerId}");
+                }
 
-                //check for any changes before updating
-                bool isChanged =
-                    !existingPlayer.FirstName.Equals(player.FirstName) ||
-                    !existingPlayer.LastName.Equals(player.LastName) ||
-                    !existingPlayer.NormalizedName.Equals(player.NormalizedName) ||
-                    !existingPlayer.Team.Equals(player.Team) ||
-                    !existingPlayer.Positions.SequenceEqual(player.Positions);
+                bool isChanged = CheckIsChanged(existingPlayerLookup.Player, currPlayer);
 
                 if (isChanged)
                 {
-                    existingPlayer.FirstName = player.FirstName;
-                    existingPlayer.LastName = player.LastName;
-                    existingPlayer.NormalizedName = player.NormalizedName;
-                    existingPlayer.Positions = player.Positions;
-                    existingPlayer.Team = player.Team;
-                    existingPlayer.LastUpdated = DateTime.UtcNow;
-
+                    PerformUpdate(existingPlayerLookup.Player, currPlayer);
                     updateCount++;
                 }
             }
             else
             {
-                _context.Add(player);
+                _context.Add(currPlayer);
                 addCount++;
             }
         }
 
         await _context.SaveChangesAsync();
         return new LoadResult(addCount, updateCount);
+    }
+
+
+    static private bool CheckIsChanged(PlayerModel oldData, PlayerModel newData)
+    {
+        return (
+            !oldData.FirstName.Equals(newData.FirstName) ||
+            !oldData.LastName.Equals(newData.LastName) ||
+            !oldData.NormalizedName.Equals(newData.NormalizedName) ||
+            !oldData.Team.Equals(newData.Team) ||
+            !oldData.Positions.SequenceEqual(newData.Positions)
+        );
+    }
+
+    static private void PerformUpdate(PlayerModel oldData, PlayerModel newData)
+    {
+        oldData.FirstName = newData.FirstName;
+        oldData.LastName = newData.LastName;
+        oldData.NormalizedName = newData.NormalizedName;
+        oldData.Positions = newData.Positions;
+        oldData.Team = newData.Team;
+        oldData.LastUpdated = DateTime.UtcNow;
     }
 }
 

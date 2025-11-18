@@ -5,7 +5,7 @@ using DataPipeline.Interfaces;
 
 namespace DataPipeline.DataPipeline.Extract;
 
-public class GetDynastyProcessIds(HttpClient client) : IDataProvider<DynastyProcessIdsDto>
+public class ExternalIdsExtract(HttpClient client) : IDataProvider<DynastyProcessIdsDto>
 {
     private readonly HttpClient _client = client;
     private readonly string _endpoint = "/repos/dynastyprocess/data/contents/files/db_playerids.csv";
