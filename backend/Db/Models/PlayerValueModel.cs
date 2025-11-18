@@ -5,7 +5,7 @@ namespace Db.Models;
 
 
 [Table("player_values")]
-[Index(nameof(DataSource), nameof(PprFormat), nameof(IsSuperFlex), nameof(PlayerId), nameof(CreatedAt), IsUnique = true)]
+[Index(nameof(DataSource), nameof(IsSuperFlex), nameof(PlayerId), nameof(CreatedAt), IsUnique = true)]
 public class PlayerValueModel
 {
     [Column("id")]
@@ -16,9 +16,6 @@ public class PlayerValueModel
 
     [Column("is_super_flex")]
     public required bool IsSuperFlex { get; set; }
-
-    [Column("ppr_format")]
-    public required string PprFormat { get; set; } = "0.5";
 
     [Column("value")]
     public required int Value { get; set; }
@@ -32,5 +29,5 @@ public class PlayerValueModel
     public int PlayerId { get; set; }
 
     [ForeignKey(nameof(PlayerId))]
-    public required PlayerModel Player { get; set; }
+    public PlayerModel? Player { get; set; }
 }

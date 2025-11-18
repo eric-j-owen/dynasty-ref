@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace DataPipeline.DTOs
 {
-    public record FcPlayerApiResponse
+    public record FcPlayerApiResDto
     {
         [JsonPropertyName("player")]
         public required PlayerObj Player { get; set; }

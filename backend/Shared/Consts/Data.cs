@@ -8,8 +8,8 @@ public static class ApiConfig
 
 public static class ApiBaseUrl
 {
-    public const string Ktc = "https://keeptradecut.com/";
-    public const string Fc = "https://api.fantasycalc.com/";
+    public const string Ktc = "https://keeptradecut.com";
+    public const string Fc = "https://api.fantasycalc.com";
     public const string Sleeper = "https://api.sleeper.app/v1/";
     public const string Github = "https://api.github.com";
 }

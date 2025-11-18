@@ -1,4 +1,4 @@
-using DataPipeline.DataPipeline.DataProviders;
+using DataPipeline.DataPipeline.Extract.PlayerValueSources;
 using DataPipeline.DTOs;
 using HtmlAgilityPack;
 
@@ -15,7 +15,7 @@ public class KtcTests
         var html = new HtmlDocument();
         html.Load(testFilePath);
 
-        var actual = KtcValuesScraper.ParsePlayersFromDocument(html);
+        var actual = KtcValuesExtract.ParsePlayersFromDocument(html);
 
         var expected = new KtcScrapedPlayerDto
         {
@@ -40,7 +40,7 @@ public class KtcTests
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
+        Assert.Throws<Exception>(() => KtcValuesExtract.ParsePlayersFromDocument(doc));
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class KtcTests
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
-        Assert.Throws<Exception>(() => KtcValuesScraper.ParsePlayersFromDocument(doc));
+        Assert.Throws<Exception>(() => KtcValuesExtract.ParsePlayersFromDocument(doc));
     }
 
 }
