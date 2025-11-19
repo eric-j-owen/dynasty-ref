@@ -12,8 +12,13 @@ using DataPipeline.DataPipeline.Transform;
 using DataPipeline.DataPipeline.Load;
 
 
-HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
+/*
+==================
+    config 
+==================
+*/
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -84,6 +89,12 @@ builder.Services.AddTransient<PlayerValuesPipeline>();
 
 using IHost host = builder.Build();
 
+
+/*
+==================
+    control flow 
+==================
+*/
 try
 {
     if (args.Length == 0)
