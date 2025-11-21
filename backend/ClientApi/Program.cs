@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Db;
 using Shared.Consts;
 using System.Text.Json.Serialization;
+using ClientApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +38,7 @@ builder.Services.AddRateLimiter(options =>
             factory: partition => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = 5,
+                PermitLimit = 60,
                 QueueLimit = 0,
                 Window = TimeSpan.FromMinutes(1),
             }));
@@ -49,6 +50,7 @@ builder.Services.AddRateLimiter(options =>
     };
 });
 
+builder.Services.AddScoped<PlayerService>();
 
 builder.Services.AddControllers()
    .AddJsonOptions(options =>
