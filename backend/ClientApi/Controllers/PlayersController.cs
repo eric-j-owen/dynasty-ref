@@ -18,20 +18,25 @@ public class PlayersController(AppDbContext Context) : ControllerBase
     [Route("rankings")]
 
     public async Task<ActionResult<IEnumerable<PlayerRankingDto>>> GetRankings(
-        [FromQuery] bool isSuperFlex,
         [FromQuery] string? searchName,
-        [FromQuery] string? positions
+        [FromQuery] string? positions,
+        [FromQuery] string? sortDataSource,
+        [FromQuery] bool? isSuperFlex = true
     )
     {
         var testingDate = new DateOnly(2025, 11, 18); // only for dev 
         // var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
+        DataSource parsedDataSource = DataSource.KeepTradeCut;
+        if (!string.IsNullOrEmpty(sortDataSource) && Enum.TryParse<DataSource>(sortDataSource, true, out var parsed))
+        {
+            parsedDataSource = parsed;
+        }
+
         var query = _context.Players
             .Where(p => p.Values != null && p.Values.Any(v => v.CreatedAt == testingDate))
             .Include(p => p.Values)
             .AsQueryable();
-
-
 
         if (!string.IsNullOrEmpty(searchName))
         {
@@ -59,7 +64,6 @@ public class PlayersController(AppDbContext Context) : ControllerBase
 
         }
 
-
         var response = await query.Select(p => new PlayerRankingDto
         {
             Id = p.Id,
@@ -77,6 +81,8 @@ public class PlayersController(AppDbContext Context) : ControllerBase
                     Source = v.DataSource
                 }).ToList()
         })
+        .OrderByDescending(p => p.Values.Any(v => v.Source == parsedDataSource))
+        .ThenByDescending(p => p.Values.FirstOrDefault(v => v.Source == parsedDataSource)!.Value)
         .AsSplitQuery()
         .ToListAsync();
 
