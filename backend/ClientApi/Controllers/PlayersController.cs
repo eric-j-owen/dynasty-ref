@@ -2,6 +2,7 @@ using ClientApi.Dtos;
 using Db;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.Consts;
 
 
 namespace ClientApi.Controllers;
@@ -11,39 +12,74 @@ namespace ClientApi.Controllers;
 public class PlayersController(AppDbContext Context) : ControllerBase
 {
     private readonly AppDbContext _context = Context;
+    private static readonly HashSet<string> _validPositions = [.. Enum.GetNames<IncludedPosition>()];
 
     [HttpGet]
     [Route("rankings")]
 
     public async Task<ActionResult<IEnumerable<PlayerRankingDto>>> GetRankings(
-        [FromQuery] string search,
         [FromQuery] bool isSuperFlex,
-        [FromQuery] string positions
+        [FromQuery] string? searchName,
+        [FromQuery] string? positions
     )
     {
         var testingDate = new DateOnly(2025, 11, 18); // only for dev 
         // var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        return await _context.Players
+        var query = _context.Players
             .Where(p => p.Values != null && p.Values.Any(v => v.CreatedAt == testingDate))
             .Include(p => p.Values)
-            .AsSplitQuery()
-            .Select(p => new PlayerRankingDto
+            .AsQueryable();
+
+
+
+        if (!string.IsNullOrEmpty(searchName))
+        {
+            query = query.Where(p =>
+                p.FirstName.ToLower().Contains(searchName.ToLower()) ||
+                p.LastName.ToLower().Contains(searchName.ToLower()) ||
+                p.NormalizedName.Contains(searchName.ToLower())
+            );
+        }
+
+        if (!string.IsNullOrEmpty(positions))
+        {
+            var filteredPositions = positions
+                .Split(",")
+                .Select(pos => pos.Trim().ToUpper())
+                .Where(_validPositions.Contains)
+                .Select(Enum.Parse<IncludedPosition>)
+                .ToList();
+
+            if (filteredPositions.Count != 0)
             {
-                Id = p.Id,
-                FirstName = p.FirstName,
-                LastName = p.LastName,
-                Team = p.Team,
-                Positions = p.Positions,
-                LastUpdated = p.LastUpdated,
-                Values = p.Values!
-                    .Where(v => v.IsSuperFlex == true)
-                    .Select(v => new PlayerValueDto
-                    {
-                        IsSuperFlex = v.IsSuperFlex,
-                        Value = v.Value,
-                        Source = v.DataSource
-                    }).ToList()
-            }).ToListAsync();
+                query = query.Where(p =>
+                    p.Positions.Any(pos => filteredPositions.Contains(pos)));
+            }
+
+        }
+
+
+        var response = await query.Select(p => new PlayerRankingDto
+        {
+            Id = p.Id,
+            FirstName = p.FirstName,
+            LastName = p.LastName,
+            Team = p.Team,
+            Positions = p.Positions,
+            LastUpdated = p.LastUpdated,
+            Values = p.Values!
+                .Where(v => v.IsSuperFlex == isSuperFlex)
+                .Select(v => new PlayerValueDto
+                {
+                    IsSuperFlex = v.IsSuperFlex,
+                    Value = v.Value,
+                    Source = v.DataSource
+                }).ToList()
+        })
+        .AsSplitQuery()
+        .ToListAsync();
+
+        return response;
     }
 }
