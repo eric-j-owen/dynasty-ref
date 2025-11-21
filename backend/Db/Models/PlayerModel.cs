@@ -28,6 +28,9 @@ public class PlayerModel
   public required DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
 
+  // navigation properties
+
+  public List<PlayerValueModel>? Values { get; set; }
   private readonly List<ExternalIdModel> _externalIds = [];
   public IEnumerable<ExternalIdModel> ExternalIds => _externalIds;
   public void AddExternalId(ExternalIdModel id) => _externalIds.Add(id);
