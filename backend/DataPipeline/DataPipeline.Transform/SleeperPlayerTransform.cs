@@ -2,9 +2,7 @@ using DataPipeline.Interfaces;
 using Db.Models;
 using DataPipeline.DTOs;
 using Shared.Consts;
-using System.Text.Json;
 using DataPipeline.Helpers;
-using Microsoft.Extensions.Logging;
 
 namespace DataPipeline.DataPipeline.Transform;
 
