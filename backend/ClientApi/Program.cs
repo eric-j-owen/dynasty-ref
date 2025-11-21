@@ -1,6 +1,8 @@
 using System.Threading.RateLimiting;
-using Db;
 using Microsoft.EntityFrameworkCore;
+using Db;
+using Shared.Consts;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,10 +10,14 @@ builder.Configuration
     .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-
 builder.Services.AddDbContextPool<AppDbContext>(opt =>
-    opt.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+    opt.UseNpgsql
+    (
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        o => o
+            .MapEnum<DataSource>("data_source")
+            .MapEnum<TeamAbbr>("team")
+            .MapEnum<IncludedPosition>("included_pos")
     ));
 
 builder.Services.AddCors(options =>
@@ -19,7 +25,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("http://localhost:8080", "https://dynasty-ref.xyz");
+            policy.WithOrigins("https://dynasty-ref.xyz");
         });
 });
 
@@ -44,25 +50,19 @@ builder.Services.AddRateLimiter(options =>
 });
 
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+   .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
 app.UseHttpsRedirection();
-
 app.UseCors();
-
 app.UseAuthorization();
-
 app.UseRateLimiter();
-
 app.MapControllers();
 
 app.Run();
