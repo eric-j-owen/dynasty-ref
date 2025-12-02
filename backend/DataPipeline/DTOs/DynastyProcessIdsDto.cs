@@ -13,4 +13,7 @@ public record DynastyProcessIdsDto
 
     [Name("mfl_id")]
     public string? MflId { get; set; }
+
+    [Name("espn_id")]
+    public string? EspnId { get; set; }
 }

@@ -20,5 +20,7 @@ public enum DataSource
     FantasyCalc,
     Sleeper,
     DynastyProcess,
-    Mfl
+    Mfl,
+
+    Espn
 }

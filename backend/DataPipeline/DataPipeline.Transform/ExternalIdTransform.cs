@@ -22,7 +22,8 @@ public class ExternalIdTransform : IDataTransformer<DynastyProcessIdsDto>
             var sources = new[]
             {
                 (DataSource: DataSource.KeepTradeCut, SourceId: player.KtcId),
-                (DataSource: DataSource.Mfl, SourceId: player.MflId)
+                (DataSource: DataSource.Mfl, SourceId: player.MflId),
+                (DataSource: DataSource.Espn, SourceId: player.EspnId),
             };
 
             //per datasource with non null id, create entity and add to master list
