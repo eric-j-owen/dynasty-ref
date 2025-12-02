@@ -18,11 +18,20 @@ public class PlayerModel
   [Column("last_name")]
   public required string LastName { get; set; }
 
+  [Column("age")]
+  public int? Age { get; set; }
+
   [Column("team")]
   public required TeamAbbr Team { get; set; }
 
   [Column("positions")]
   public required IncludedPosition[] Positions { get; set; }
+
+  [Column("injury_status")]
+  public string? InjuryStatus { get; set; }
+
+  [Column("college")]
+  public string? College { get; set; }
 
   [Column("last_updated")]
   public required DateTime LastUpdated { get; set; } = DateTime.UtcNow;

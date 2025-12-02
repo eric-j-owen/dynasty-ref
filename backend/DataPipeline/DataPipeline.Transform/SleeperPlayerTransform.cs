@@ -49,6 +49,9 @@ public class SleeperPlayerTransformer : IDataTransformer<SleeperPlayerDto>
                 LastName = player.LastName,
                 Positions = normalizedPositions,
                 Team = normalizedTeam,
+                Age = player.Age,
+                College = player.College,
+                InjuryStatus = player.InjuryStatus,
                 LastUpdated = DateTime.UtcNow
             };
 

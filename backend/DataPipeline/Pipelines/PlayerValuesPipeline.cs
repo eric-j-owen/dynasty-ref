@@ -1,9 +1,7 @@
 using DataPipeline.DataPipeline.Extract;
 using DataPipeline.DataPipeline.Load;
-using DataPipeline.DTOs;
 using DataPipeline.Helpers;
 using DataPipeline.Interfaces;
-using Db.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DataPipeline.Pipelines;

@@ -63,7 +63,10 @@ public class PlayerUpsertLoader(AppDbContext context) : IDataLoader<PlayerModel>
             !oldData.LastName.Equals(newData.LastName) ||
             !oldData.NormalizedName.Equals(newData.NormalizedName) ||
             !oldData.Team.Equals(newData.Team) ||
-            !oldData.Positions.SequenceEqual(newData.Positions)
+            !oldData.Positions.SequenceEqual(newData.Positions) ||
+            oldData.Age != newData.Age ||
+            oldData.InjuryStatus != newData.InjuryStatus ||
+            oldData.College != newData.College
         );
     }
 
@@ -74,6 +77,9 @@ public class PlayerUpsertLoader(AppDbContext context) : IDataLoader<PlayerModel>
         oldData.NormalizedName = newData.NormalizedName;
         oldData.Positions = newData.Positions;
         oldData.Team = newData.Team;
+        oldData.Age = newData.Age;
+        oldData.InjuryStatus = newData.InjuryStatus;
+        oldData.College = newData.College;
         oldData.LastUpdated = DateTime.UtcNow;
     }
 }

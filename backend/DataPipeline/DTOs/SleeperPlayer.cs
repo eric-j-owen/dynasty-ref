@@ -21,6 +21,17 @@ public record SleeperPlayerDto
 
     [JsonPropertyName("team")]
     public string? Team { get; set; }
+
+    [JsonPropertyName("injury_status")]
+    public string? InjuryStatus { get; set; }
+
+    [JsonPropertyName("college")]
+    public string? College { get; set; }
+
+
+    [JsonPropertyName("age")]
+    public int? Age { get; set; }
+
 }
 
 
