@@ -1,4 +1,5 @@
 using ClientApi.Dtos;
+using ClientApi.Dtos.Players;
 using Db;
 using Microsoft.EntityFrameworkCore;
 using Shared.Consts;
@@ -65,7 +66,6 @@ public class PlayerService(AppDbContext context)
             Id = p.Id,
             FirstName = p.FirstName,
             LastName = p.LastName,
-            Team = p.Team,
             Positions = p.Positions,
             LastUpdated = p.LastUpdated,
             Values = p.Values!
@@ -92,4 +92,11 @@ public class PlayerService(AppDbContext context)
             items
         );
     }
+
+    public async Task<PlayerDetailsDto> GetPlayerDetails(int playerId)
+    {
+        var player = await _context.Players
+            .Where(p => p.Id == playerId)
+    }
+
 }
