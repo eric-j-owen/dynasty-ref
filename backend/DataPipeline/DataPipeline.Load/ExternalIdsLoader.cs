@@ -13,10 +13,16 @@ public class ExternalIdsLoader(AppDbContext context) : IDataLoader<ExternalIdWit
     private readonly AppDbContext _context = context;
     public async Task<LoadResult> LoadData(List<ExternalIdWithLookupDto> data)
     {
+        //remove duplicate ids, need manual review due to data issue
+        var uniqueIds = data
+            .DistinctBy(x => new { x.DataSource, x.SourceId })
+            .ToList();
+        Console.WriteLine($"found {data.Count - uniqueIds.Count} duplicates");
+
         int addCount = 0;
 
         //gets sleeper ids from input data
-        var sleeperIds = data.Select(r => r.SleeperId).ToHashSet();
+        var sleeperIds = uniqueIds.Select(r => r.SleeperId).ToHashSet();
 
         //matches sleeper ids to existing players
         var existingPlayers = await _context.ExternalIdPlayerLookups
@@ -30,7 +36,7 @@ public class ExternalIdsLoader(AppDbContext context) : IDataLoader<ExternalIdWit
             .Select(lookup => new { lookup.PlayerId, lookup.DataSource, lookup.SourceId })
             .ToHashSetAsync();
 
-        foreach (var record in data)
+        foreach (var record in uniqueIds)
         {
             //if player exists by sleeperid, output internal playerid
             if (existingPlayers.TryGetValue(record.SleeperId, out var internalPlayerId))
