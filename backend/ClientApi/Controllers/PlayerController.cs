@@ -1,16 +1,17 @@
 using ClientApi.Dtos;
+using ClientApi.Dtos.Espn;
 using ClientApi.Dtos.Players;
 using ClientApi.Services;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace ClientApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PlayerController(PlayerService playerService) : ControllerBase
+public class PlayerController(PlayerService playerService, EspnService espnService) : ControllerBase
 {
     private readonly PlayerService _playerService = playerService;
+    private readonly EspnService _espnService = espnService;
 
     [HttpGet]
     [Route("rankings")]
@@ -35,18 +36,31 @@ public class PlayerController(PlayerService playerService) : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet]
-    [Route("{playerId}")]
-    public async Task<ActionResult<PlayerDetailsDto>> GetPlayerDetails(int playerId)
-    {
-        var result = await _playerService.GetPlayerDetails(playerId);
+    // [HttpGet]
+    // [Route("{playerId}")]
+    // public async Task<ActionResult<PlayerDetailsDto>> GetPlayerDetails(int playerId)
+    // {
+    //     var result = await _playerService.GetPlayerDetails(playerId);
 
-        if (result == null)
+    //     if (result == null)
+    //     {
+    //         return NotFound();
+    //     }
+
+    //     return Ok(result);
+    // }
+
+    [HttpGet]
+    [Route("team/{teamAbbr}")]
+    public async Task<ActionResult<TeamStatsResponseDto>> GetTeamStats(string teamAbbr)
+    {
+        var res = await _espnService.GetTeamStats(teamAbbr);
+        if (res == null)
         {
             return NotFound();
         }
 
-        return Ok(result);
+        return Ok(res);
     }
 
 }

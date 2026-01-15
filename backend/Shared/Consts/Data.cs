@@ -12,6 +12,7 @@ public static class ApiBaseUrl
     public const string Fc = "https://api.fantasycalc.com";
     public const string Sleeper = "https://api.sleeper.app/v1/";
     public const string Github = "https://api.github.com";
+    public const string Espn = "https://site.api.espn.com/apis";
 }
 
 public enum DataSource
@@ -21,6 +22,5 @@ public enum DataSource
     Sleeper,
     DynastyProcess,
     Mfl,
-
     Espn
 }

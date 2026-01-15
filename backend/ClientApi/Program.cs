@@ -50,6 +50,12 @@ builder.Services.AddRateLimiter(options =>
     };
 });
 
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<EspnService>(client =>
+{
+    client.BaseAddress = new Uri(ApiBaseUrl.Espn);
+});
+
 builder.Services.AddScoped<PlayerService>();
 
 builder.Services.AddControllers()
