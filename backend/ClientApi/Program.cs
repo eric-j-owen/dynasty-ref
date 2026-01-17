@@ -71,6 +71,7 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthorization();
 app.UseRateLimiter();
+app.UsePathBase("/api");
 app.MapControllers();
 
 app.Run();

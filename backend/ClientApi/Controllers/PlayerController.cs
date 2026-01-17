@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ClientApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("a[controller]")]
 public class PlayerController(PlayerService playerService, EspnService espnService) : ControllerBase
 {
     private readonly PlayerService _playerService = playerService;
@@ -49,18 +49,4 @@ public class PlayerController(PlayerService playerService, EspnService espnServi
 
     //     return Ok(result);
     // }
-
-    [HttpGet]
-    [Route("team/{teamAbbr}")]
-    public async Task<ActionResult<MappedTeamStats>> GetTeamStats(string teamAbbr)
-    {
-        var res = await _espnService.GetTeamStats(teamAbbr);
-        if (res == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(res);
-    }
-
 }
