@@ -52,7 +52,7 @@ public class PlayerController(PlayerService playerService, EspnService espnServi
 
     [HttpGet]
     [Route("team/{teamAbbr}")]
-    public async Task<ActionResult<TeamStatsResponseDto>> GetTeamStats(string teamAbbr)
+    public async Task<ActionResult<MappedTeamStats>> GetTeamStats(string teamAbbr)
     {
         var res = await _espnService.GetTeamStats(teamAbbr);
         if (res == null)

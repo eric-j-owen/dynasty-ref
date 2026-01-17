@@ -25,7 +25,7 @@ public class EspnService(HttpClient client, IMemoryCache cache)
     private static readonly TimeSpan cacheDuration = TimeSpan.FromDays(7);
     private readonly static Dictionary<TeamAbbr, int> _teamIdsMap = new() { { TeamAbbr.ARI, 22 } };
 
-    public async Task<TeamStatsResponseDto?> GetTeamStats(string teamAbbr)
+    public async Task<MappedTeamStats?> GetTeamStats(string teamAbbr)
     {
         // parse parameter string to team abbreviations enum
         if (!Enum.TryParse<TeamAbbr>(teamAbbr, true, out var parsedTeam))
@@ -36,33 +36,34 @@ public class EspnService(HttpClient client, IMemoryCache cache)
 
         var key = $"team_stats_{parsedTeam}";
 
-        if (_cache.TryGetValue(key, out TeamStatsResponseDto? cached))
+        //check cache
+        if (_cache.TryGetValue(key, out MappedTeamStats? cached))
         {
             Console.WriteLine("returning cached");
             return cached;
         }
 
+        //verify input team
         if (!_teamIdsMap.TryGetValue(parsedTeam, out var teamId))
         {
             Console.WriteLine("no espn id found for given team");
             return null;
         }
 
+        // http + map response
         try
         {
             var url = $"{baseUrl}/site/v2/sports/football/nfl/teams/{teamId}/statistics";
-            var res = await _client.GetFromJsonAsync<TeamStatsResponseDto>(url);
-            if (res != null)
-            {
-                _cache.Set(key, res, cacheDuration);
-            }
-            else
+            var res = await _client.GetFromJsonAsync<EspnTeamStatsResponseDto>(url);
+            if (res == null)
             {
                 Console.WriteLine("response is null");
+                return null;
             }
-            return res;
 
-
+            var mapped = DataMapperService.EspnTeamStats(res);
+            _cache.Set(key, mapped, cacheDuration);
+            return mapped;
         }
         catch (Exception e)
         {

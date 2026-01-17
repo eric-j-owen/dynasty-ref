@@ -2,40 +2,68 @@ using System.Text.Json.Serialization;
 
 namespace ClientApi.Dtos.Espn;
 
-public record TeamStatsResponseDto
+public record MappedTeamStats
+{
+    public required OffenseStats Offense { get; set; }
+    public required OppStats Opponent { get; set; }
+}
+
+public record OffenseStats
+{
+    public decimal? TouchdownsPerGame { get; set; }
+    public decimal? PassingTouchdownsPerGame { get; set; }
+    public decimal? RushingTouchdowns { get; set; }
+    public decimal? PassingYardsPerGame { get; set; }
+    public decimal? RushingYardsPerGame { get; set; }
+
+}
+
+public record OppStats
+{
+    public decimal? InterceptionsPerGame { get; set; }
+    public decimal? PassesDefendedPerGame { get; set; }
+    public decimal? SacksPerGame { get; set; }
+    public decimal? TacklesPerGame { get; set; }
+    public decimal? TacklesForLossPerGame { get; set; }
+    public decimal? StuffsPerGame { get; set; }
+
+}
+
+internal record EspnTeamStatsResponseDto
 {
     [JsonPropertyName("results")]
-    public ResultsContainer? Results { get; set; }
+    public required ResultsContainer Results { get; set; }
 }
 
-public record ResultsContainer
+internal record ResultsContainer
 {
     [JsonPropertyName("stats")]
-    public StatsContainer? Stats { get; set; }
+    public required StatsContainer Stats { get; set; }
 
     [JsonPropertyName("opponent")]
-    public List<TeamCategory>? Opponent { get; set; }
+    public required List<TeamCategory> Opponent { get; set; }
 }
 
-public record StatsContainer
+internal record StatsContainer
 {
     [JsonPropertyName("categories")]
-    public List<TeamCategory>? Categories { get; set; }
+    public required List<TeamCategory> Categories { get; set; }
 }
 
-public record TeamCategory
+internal record TeamCategory
 {
     [JsonPropertyName("name")]
-    public string? Name { get; set; }
+    public required string Name { get; set; }
 
     [JsonPropertyName("displayName")]
-    public string? DisplayName { get; set; }
+    public required string DisplayName { get; set; }
 
     [JsonPropertyName("stats")]
-    public List<TeamStatItem>? Stats { get; set; }
+    public required List<TeamStatItem> Stats { get; set; }
 }
 
-public record TeamStatItem
+
+internal record TeamStatItem
 {
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -47,5 +75,8 @@ public record TeamStatItem
     public string? Abbreviation { get; set; }
 
     [JsonPropertyName("value")]
-    public decimal? Value { get; set; }
+    public decimal Value { get; set; }
+
+    [JsonPropertyName("perGameValue")]
+    public decimal PerGameValue { get; set; }
 }
