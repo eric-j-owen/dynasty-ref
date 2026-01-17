@@ -4,8 +4,9 @@ namespace ClientApi.Dtos.Espn;
 
 public record MappedTeamStats
 {
+    public required string Team { get; set; }
     public required OffenseStats Offense { get; set; }
-    public required OppStats Opponent { get; set; }
+    public required OppsStats Opponents { get; set; }
 }
 
 public record OffenseStats
@@ -15,10 +16,11 @@ public record OffenseStats
     public decimal? RushingTouchdowns { get; set; }
     public decimal? PassingYardsPerGame { get; set; }
     public decimal? RushingYardsPerGame { get; set; }
+    public decimal? YardsPerGame { get; set; }
 
 }
 
-public record OppStats
+public record OppsStats
 {
     public decimal? InterceptionsPerGame { get; set; }
     public decimal? PassesDefendedPerGame { get; set; }
@@ -33,6 +35,14 @@ internal record EspnTeamStatsResponseDto
 {
     [JsonPropertyName("results")]
     public required ResultsContainer Results { get; set; }
+
+    [JsonPropertyName("team")]
+    public required TeamContainer Team { get; set; }
+}
+
+internal record TeamContainer
+{
+    public required string Abbreviation { get; set; }
 }
 
 internal record ResultsContainer
@@ -41,7 +51,7 @@ internal record ResultsContainer
     public required StatsContainer Stats { get; set; }
 
     [JsonPropertyName("opponent")]
-    public required List<TeamCategory> Opponent { get; set; }
+    public required List<TeamCategory> Opponents { get; set; }
 }
 
 internal record StatsContainer

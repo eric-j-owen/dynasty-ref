@@ -23,7 +23,17 @@ public class EspnService(HttpClient client, IMemoryCache cache)
     private readonly static string baseUrl = ApiBaseUrl.Espn;
     private readonly IMemoryCache _cache = cache;
     private static readonly TimeSpan cacheDuration = TimeSpan.FromDays(7);
-    private readonly static Dictionary<TeamAbbr, int> _teamIdsMap = new() { { TeamAbbr.ARI, 22 } };
+    private readonly static Dictionary<TeamAbbr, int> _teamIdsMap = new()
+    {
+        { TeamAbbr.ARI, 22 }, { TeamAbbr.ATL, 1 }, {TeamAbbr.BAL, 33}, {TeamAbbr.BUF, 2},
+        { TeamAbbr.CAR, 29 }, { TeamAbbr.CHI, 3 }, {TeamAbbr.CIN, 4}, {TeamAbbr.CLE, 5},
+        { TeamAbbr.DAL, 6 }, { TeamAbbr.DEN, 7 }, {TeamAbbr.DET, 8}, {TeamAbbr.GB, 9},
+        { TeamAbbr.HOU, 34 }, { TeamAbbr.IND, 11 }, {TeamAbbr.JAX, 30}, {TeamAbbr.KC, 12},
+        { TeamAbbr.LV, 13 }, { TeamAbbr.LAC, 24 }, {TeamAbbr.LAR, 14}, {TeamAbbr.MIA, 15},
+        { TeamAbbr.MIN, 16 }, { TeamAbbr.NE, 17 }, {TeamAbbr.NO, 18}, {TeamAbbr.NYG, 19},
+        { TeamAbbr.NYJ, 20 }, { TeamAbbr.PHI, 21 }, {TeamAbbr.PIT, 23}, {TeamAbbr.SF, 25},
+        { TeamAbbr.SEA, 26 }, { TeamAbbr.TB, 27 }, {TeamAbbr.TEN, 10}, {TeamAbbr.WAS, 28},
+    };
 
     public async Task<MappedTeamStats?> GetTeamStats(string teamAbbr)
     {

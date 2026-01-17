@@ -7,9 +7,9 @@ internal static class DataMapperService
     internal static MappedTeamStats? EspnTeamStats(EspnTeamStatsResponseDto data)
     {
         var team = data.Results.Stats.Categories;
-        var opp = data.Results.Opponent;
+        var opps = data.Results.Opponents;
 
-        if (team == null || opp == null)
+        if (team == null || opps == null)
         {
             Console.WriteLine("data is null");
             return null;
@@ -20,22 +20,25 @@ internal static class DataMapperService
             passing = team.FirstOrDefault(c => c.Name == "passing")?.Stats,
             rushing = team.FirstOrDefault(c => c.Name == "rushing")?.Stats,
             scoring = team.FirstOrDefault(c => c.Name == "scoring")?.Stats,
-            defensive = opp.FirstOrDefault(c => c.Name == "defensive")?.Stats,
-            interceptions = opp.FirstOrDefault(c => c.Name == "defensiveInterceptions")?.Stats
+            defensive = opps.FirstOrDefault(c => c.Name == "defensive")?.Stats,
+            interceptions = opps.FirstOrDefault(c => c.Name == "defensiveInterceptions")?.Stats
         };
 
         return new MappedTeamStats
         {
+            Team = data.Team.Abbreviation,
+
             Offense = new OffenseStats
             {
                 TouchdownsPerGame = categories.scoring?.FirstOrDefault(x => x.Name == "totalTouchdowns")?.PerGameValue,
                 PassingTouchdownsPerGame = categories.passing?.FirstOrDefault(x => x.Name == "passingTouchdowns")?.PerGameValue,
                 RushingTouchdowns = categories.rushing?.FirstOrDefault(x => x.Name == "rushingTouchdowns")?.Value,
                 PassingYardsPerGame = categories.scoring?.FirstOrDefault(x => x.Name == "totalPointsPerGame")?.Value,
-                RushingYardsPerGame = categories.rushing?.FirstOrDefault(x => x.Name == "rushingYardsPerGame")?.Value
+                RushingYardsPerGame = categories.rushing?.FirstOrDefault(x => x.Name == "rushingYardsPerGame")?.Value,
+                YardsPerGame = categories.passing?.FirstOrDefault(x => x.Name == "yardsPerGame")?.Value
             },
 
-            Opponent = new OppStats
+            Opponents = new OppsStats
             {
                 InterceptionsPerGame = categories.interceptions?.FirstOrDefault(x => x.Name == "interceptions")?.PerGameValue,
                 PassesDefendedPerGame = categories.defensive?.FirstOrDefault(x => x.Name == "passesDefended")?.PerGameValue,
@@ -43,7 +46,6 @@ internal static class DataMapperService
                 TacklesPerGame = categories.defensive?.FirstOrDefault(x => x.Name == "totalTackles")?.PerGameValue,
                 TacklesForLossPerGame = categories.defensive?.FirstOrDefault(x => x.Name == "tacklesForLoss")?.PerGameValue,
                 StuffsPerGame = categories.defensive?.FirstOrDefault(x => x.Name == "stuffs")?.PerGameValue,
-
             }
         };
     }
