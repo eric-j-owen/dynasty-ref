@@ -14,27 +14,22 @@ public class PlayerService(AppDbContext context)
     public async Task<PaginatedResults<PlayerRankingDto>> GetPlayerRankings(
         string? searchName,
         string? positions,
-        string sortDataSource,
         bool isSuperFlex,
-        int page = 0,
-        int pageSize = 15
+        DataSource sortDataSource,
+        int page,
+        int pageSize
     )
     {
-        var testingDate = new DateOnly(2025, 11, 18); // only for dev 
+        var testingDate = new DateOnly(2026, 1, 10); // only for dev 
         // var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        DataSource parsedDataSource = DataSource.KeepTradeCut;
-        if (!string.IsNullOrEmpty(sortDataSource) && Enum.TryParse<DataSource>(sortDataSource, true, out var parsed))
-        {
-            parsedDataSource = parsed;
-        }
-
+        //initial query to get all player values
         var query = _context.Players
             .Where(p => p.Values != null && p.Values.Any(v => v.CreatedAt == testingDate))
             .Include(p => p.Values)
             .AsQueryable();
 
-
+        //search filter
         if (!string.IsNullOrEmpty(searchName))
         {
             query = query.Where(p =>
@@ -44,6 +39,7 @@ public class PlayerService(AppDbContext context)
             );
         }
 
+        // position filter
         if (!string.IsNullOrEmpty(positions))
         {
             var filteredPositions = positions
@@ -61,6 +57,7 @@ public class PlayerService(AppDbContext context)
 
         }
 
+        //final mapping and order filter
         var items = await query.Select(p => new PlayerRankingDto
         {
             Id = p.Id,
@@ -77,13 +74,12 @@ public class PlayerService(AppDbContext context)
                     Source = v.DataSource
                 }).ToList()
         })
-        .OrderByDescending(p => p.Values.Any(v => v.Source == parsedDataSource))
-        .ThenByDescending(p => p.Values.FirstOrDefault(v => v.Source == parsedDataSource)!.Value)
+        .OrderByDescending(p => p.Values.Any(v => v.Source == sortDataSource))
+        .ThenByDescending(p => p.Values.FirstOrDefault(v => v.Source == sortDataSource)!.Value)
         .Skip(page * pageSize)
         .Take(pageSize)
         .AsSplitQuery()
         .ToListAsync();
-
 
         return new PaginatedResults<PlayerRankingDto>
         (
@@ -93,10 +89,10 @@ public class PlayerService(AppDbContext context)
         );
     }
 
-    public async Task<PlayerDetailsDto> GetPlayerDetails(int playerId)
-    {
-        var player = await _context.Players
-            .Where(p => p.Id == playerId)
-    }
+    // public async Task<PlayerDetailsDto> GetPlayerDetails(int playerId)
+    // {
+    //     var player = await _context.Players
+    //         .Where(p => p.Id == playerId)
+    // }
 
 }

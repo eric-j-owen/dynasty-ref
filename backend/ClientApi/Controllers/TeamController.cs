@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ClientApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class TeamController(EspnService espnService) : ControllerBase
 {
     private readonly EspnService _espnService = espnService;
