@@ -10,7 +10,7 @@ namespace DataPipeline.DataPipeline.Extract.PlayerValueSources;
 public class KtcValuesExtract(HttpClient client) : IDataProvider<PlayerValueWithLookupDto>
 {
     private readonly HttpClient _client = client;
-    private readonly string _endpoint = "/dynasty-rankings?page=0";
+    private readonly string _endpoint = "/dynasty-rankings";
 
     public async Task<List<PlayerValueWithLookupDto>> ExtractDataAsync()
     {
