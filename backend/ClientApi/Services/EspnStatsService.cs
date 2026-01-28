@@ -4,25 +4,12 @@ using Shared.Consts;
 
 namespace ClientApi.Services;
 
-
-/*
-
-athlete stats
-common/v3/sports/football/nfl/athletes/4262921/stats
-
-team ids
-site/v2/sports/football/nfl/teams
-
-team stats 
-site/v2/sports/football/nfl/teams/22/statistics
-
-*/
 public class EspnService(HttpClient client, IMemoryCache cache)
 {
     private readonly HttpClient _client = client;
-    private readonly static string baseUrl = ApiBaseUrl.Espn;
+    private readonly static string _baseUrl = ApiBaseUrl.Espn;
     private readonly IMemoryCache _cache = cache;
-    private static readonly TimeSpan cacheDuration = TimeSpan.FromDays(7);
+    private static readonly TimeSpan _cacheDuration = TimeSpan.FromDays(7);
     private readonly static Dictionary<TeamAbbr, int> _teamIdsMap = new()
     {
         { TeamAbbr.ARI, 22 }, { TeamAbbr.ATL, 1 }, {TeamAbbr.BAL, 33}, {TeamAbbr.BUF, 2},
@@ -63,7 +50,7 @@ public class EspnService(HttpClient client, IMemoryCache cache)
         // http + map response
         try
         {
-            var url = $"{baseUrl}/site/v2/sports/football/nfl/teams/{teamId}/statistics";
+            var url = $"{_baseUrl}/site/v2/sports/football/nfl/teams/{teamId}/statistics";
             var res = await _client.GetFromJsonAsync<EspnTeamStatsResponseDto>(url);
             if (res == null)
             {
@@ -72,7 +59,7 @@ public class EspnService(HttpClient client, IMemoryCache cache)
             }
 
             var mapped = DataMapperService.EspnTeamStats(res);
-            _cache.Set(key, mapped, cacheDuration);
+            _cache.Set(key, mapped, _cacheDuration);
             return mapped;
         }
         catch (Exception e)
@@ -86,10 +73,14 @@ public class EspnService(HttpClient client, IMemoryCache cache)
 
     }
 
-    // public async Task GetPlayerStats(int espnId)
-    // {
+    public async Task<EspnAthleteStatsResponse?> GetPlayerStats(int espnId)
+    {
 
-    // }
+        var url = $"{_baseUrl}/common/v3/sports/football/nfl/athletes/{espnId}/stats?seasontype=2";
+        var response = await _client.GetFromJsonAsync<EspnAthleteStatsResponse>(url);
+        return response;
+
+    }
 
 
 }

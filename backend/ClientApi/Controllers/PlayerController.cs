@@ -50,4 +50,29 @@ public class PlayerController(PlayerService playerService, EspnService espnServi
 
     //     return Ok(result);
     // }
+
+    [HttpGet]
+    [Route("stats/{espnId}")]
+    public async Task<ActionResult<EspnAthleteStatsResponse>> GetPlayerEspnStats(int espnId)
+    {
+        try
+        {
+            var response = await _espnService.GetPlayerStats(espnId);
+            if (response == null)
+            {
+                return NotFound(new
+                {
+                    detail = $"{espnId} not found",
+                    instance = HttpContext.Request.Path
+                });
+            }
+
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            return Problem(detail: $"{e}", instance: HttpContext.Request.Path);
+        }
+
+    }
 }
