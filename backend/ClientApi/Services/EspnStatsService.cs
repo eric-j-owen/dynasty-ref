@@ -48,39 +48,46 @@ public class EspnService(HttpClient client, IMemoryCache cache)
         }
 
         // http + map response
-        try
-        {
-            var url = $"{_baseUrl}/site/v2/sports/football/nfl/teams/{teamId}/statistics";
-            var res = await _client.GetFromJsonAsync<EspnTeamStatsResponseDto>(url);
-            if (res == null)
-            {
-                Console.WriteLine("response is null");
-                return null;
-            }
 
-            var mapped = DataMapperService.EspnTeamStats(res);
-            _cache.Set(key, mapped, _cacheDuration);
-            return mapped;
-        }
-        catch (Exception e)
+        var url = $"{_baseUrl}/site/v2/sports/football/nfl/teams/{teamId}/statistics";
+        var response = await _client.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadFromJsonAsync<EspnTeamStatsResponseDto>();
+        if (json == null)
         {
-            Console.WriteLine($"error from espnstatsservice: {e}");
+            Console.WriteLine("team stats returned null");
             return null;
         }
 
+        var mapped = DataMapperService.EspnTeamStats(json);
+        _cache.Set(key, mapped, _cacheDuration);
 
-
-
+        return mapped;
     }
 
     public async Task<EspnAthleteStatsResponse?> GetPlayerStats(int espnId)
     {
+        var key = $"player_stats_{espnId}";
+        if (_cache.TryGetValue(key, out EspnAthleteStatsResponse? cached))
+        {
+            Console.WriteLine("return cached");
+            return cached;
+        }
 
         var url = $"{_baseUrl}/common/v3/sports/football/nfl/athletes/{espnId}/stats?seasontype=2";
-        var response = await _client.GetFromJsonAsync<EspnAthleteStatsResponse>(url);
-        return response;
+        var response = await _client.GetAsync(url);
+        response.EnsureSuccessStatusCode();
 
+        var json = await response.Content.ReadFromJsonAsync<EspnAthleteStatsResponse>();
+        if (json == null)
+        {
+            Console.WriteLine("player stats returned null");
+            return null;
+        }
+
+        _cache.Set(key, json, _cacheDuration);
+
+        return json;
     }
-
-
 }

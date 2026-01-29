@@ -14,12 +14,20 @@ public class TeamController(EspnService espnService) : ControllerBase
     [Route("stats/{teamAbbr}")]
     public async Task<ActionResult<MappedTeamStats>> GetTeamStats(string teamAbbr)
     {
-        var res = await _espnService.GetTeamStats(teamAbbr);
-        if (res == null)
+        try
+        {
+            var res = await _espnService.GetTeamStats(teamAbbr);
+            return Ok(res);
+        }
+        catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return NotFound();
         }
 
-        return Ok(res);
+        catch (Exception)
+        {
+            return Problem(detail: "an error occured", instance: HttpContext.Request.Path);
+        }
+
     }
 }

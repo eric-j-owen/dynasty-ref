@@ -4,6 +4,7 @@ using ClientApi.Dtos.Players;
 using ClientApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Consts;
+using System.Net;
 
 namespace ClientApi.Controllers;
 
@@ -58,20 +59,21 @@ public class PlayerController(PlayerService playerService, EspnService espnServi
         try
         {
             var response = await _espnService.GetPlayerStats(espnId);
-            if (response == null)
-            {
-                return NotFound(new
-                {
-                    detail = $"{espnId} not found",
-                    instance = HttpContext.Request.Path
-                });
-            }
-
             return Ok(response);
         }
-        catch (Exception e)
+
+        catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.NotFound)
         {
-            return Problem(detail: $"{e}", instance: HttpContext.Request.Path);
+            return NotFound(new
+            {
+                instance = HttpContext.Request.Path,
+                e.StatusCode,
+                e.Message,
+            });
+        }
+        catch (Exception)
+        {
+            return Problem(detail: "an error occurred", instance: HttpContext.Request.Path);
         }
 
     }
